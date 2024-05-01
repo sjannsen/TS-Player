@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npx ts-node ./src/index.ts",
+    "dev": "npx ts-node ./src/index.ts | npx pino-pretty",
     "test": "jest"
   },
   "keywords": [],
@@ -29,6 +29,8 @@
     "@types/amqplib": "^0.10.5",
     "amqplib": "^0.10.4",
     "axios": "^1.6.8",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "pino": "^9.0.0",
+    "pino-pretty": "^11.0.0"
   }
 }
