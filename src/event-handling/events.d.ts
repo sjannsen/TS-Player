@@ -1,10 +1,4 @@
-type EventHeader = {
-  type: string
-  eventId: string
-  transactionId: string
-  version: number
-  timestamp: strings
-}
+import { Player } from '../types'
 
 export type ErrorEvent = {
   playerId: string
@@ -42,3 +36,32 @@ interface EventTypes {
 }
 
 type EventType = keyof EventTypes
+
+type EventPayload<T extends EventType> = T extends keyof EventTypes ? EventTypes[T] : unknown
+
+type EventHeader = {
+  type: EventType
+  eventId: string
+  transactionId: string
+  version: number
+  timestamp: string
+}
+
+export type Event<T extends keyof EventTypes> = {
+  header: EventHeader
+  payload: EventTypes[T]
+}
+
+export type EventContext<T extends keyof EventTypes> = {
+  type: T
+  event: Event<T>
+  playerContext: Player
+}
+
+type GameStatus = 'created' | 'started' | 'ended'
+
+type GameStatusEvent = {
+  gameId: string
+  gameworldId: string
+  status: GameStatus
+}

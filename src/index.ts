@@ -55,6 +55,7 @@ async function main() {
 
   if (devMode) await startGame(game.gameId)
 }
+
 main()
 
-clearSetUp()
+// clearSetUp()

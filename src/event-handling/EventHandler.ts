@@ -1,6 +1,7 @@
 import ampqlib from 'amqplib'
 import logger from '../utils/logger'
-import { EventHeader } from './events'
+import { EventContext, EventHeader, EventPayload, EventTypes } from './events'
+import EventBus from './eventBus'
 
 const rabbitMQConfig = {
   protocol: 'amqp',
@@ -33,7 +34,7 @@ export default async function setUpRabbitMQ(playerId: string, playerExchange: st
   const exchange = playerExchange
 
   await channel.assertQueue(queue)
-  await channel.bindQueue(queue, exchange, '#')
+  channel.bindQueue(queue, exchange, '#')
 
   channel.consume(queue, (message) => {
     if (message === null) {
@@ -56,8 +57,34 @@ export default async function setUpRabbitMQ(playerId: string, playerExchange: st
     ) as EventHeader
 
     const event = JSON.parse(message.content.toString())
-    logger.info(eventHeader, 'Received Event')
+    const eventType = eventHeader.type
+    const mappedPayload = mapEventPayload(event)
 
+    const name = process.env.PLAYER_NAME ?? 'playerName' // TODO: Centralize
+    const email = process.env.PLAYER_EMAIL ?? 'playerEmail'
+
+    const context: EventContext<typeof eventType> = {
+      type: eventType,
+      event: {
+        header: eventHeader,
+        payload: mappedPayload,
+      },
+      playerContext: {
+        playerId,
+        name,
+        email,
+        playerExchange,
+      },
+    }
+
+    logger.info(eventType, 'Publish event')
+    EventBus.publish(eventType, context)
     channel.ack(message)
   })
+}
+
+type EventType = keyof EventTypes
+
+function mapEventPayload<T extends EventType>(payload: unknown): EventPayload<T> {
+  return payload as EventPayload<T>
 }

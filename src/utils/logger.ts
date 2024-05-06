@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import pino, { StreamEntry } from 'pino'
 import dotenv from 'dotenv'
+
 dotenv.config()
 
 const logDirectory = process.env.LOG_DIRECTORY || 'logs'
