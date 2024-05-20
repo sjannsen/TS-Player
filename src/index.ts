@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 import { clearSetUp, setUpGame, startGame } from './development-setup'
 import setUpRabbitMQ from './event-handling/EventHandler'
 import { joinNextGameAvailable, setUpPlayer } from './setup'
+import { setUpStateHandlers } from './setup/setUpStateHandlers'
 import { updatePlayerConfig } from './shared/config'
 import { Game, Player } from './shared/types'
 import logger from './utils/logger'
@@ -56,9 +57,9 @@ async function main() {
 
   const game: Game = await joinNextGameAvailable()
 
+  setUpStateHandlers()
   if (devMode) await startGame(game.gameId)
 }
-
 main()
 
 // clearSetUp()
