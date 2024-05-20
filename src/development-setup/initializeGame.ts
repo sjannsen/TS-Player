@@ -1,4 +1,4 @@
-import { Game } from '../types'
+import { Game } from '../shared/types'
 import logger from '../utils/logger'
 
 const maxRounds = 10_000

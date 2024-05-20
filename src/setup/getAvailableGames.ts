@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Game } from '../types'
+import { Game } from '../shared/types'
 import logger from '../utils/logger'
 
 export default async function getAvailableGames(): Promise<Game[]> {

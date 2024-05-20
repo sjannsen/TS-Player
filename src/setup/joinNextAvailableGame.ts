@@ -1,4 +1,4 @@
-import { Game, Player } from '../types'
+import { Game, Player } from '../shared/types'
 import logger from '../utils/logger'
 
 type JoinNextAvailableGameProps = {

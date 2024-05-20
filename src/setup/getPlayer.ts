@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Player } from '../types'
+import { Player } from '../shared/types'
 import logger from '../utils/logger'
 
 /**

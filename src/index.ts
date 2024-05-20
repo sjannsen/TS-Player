@@ -3,7 +3,8 @@ import dotenv from 'dotenv'
 import { clearSetUp, setUpGame, startGame } from './development-setup'
 import setUpRabbitMQ from './event-handling/EventHandler'
 import { joinNextGameAvailable, setUpPlayer } from './setup'
-import { Game, Player } from './types'
+import { updatePlayerConfig } from './shared/config'
+import { Game, Player } from './shared/types'
 import logger from './utils/logger'
 
 dotenv.config()
@@ -51,6 +52,8 @@ async function main() {
 
   logger.info({ playerId: player.playerId, playerExchange: player.playerExchange }, 'SetUp RabbitMQ')
   await setUpRabbitMQ(player.playerId, player.playerExchange)
+  updatePlayerConfig(player)
+
   const game: Game = await joinNextGameAvailable()
 
   if (devMode) await startGame(game.gameId)

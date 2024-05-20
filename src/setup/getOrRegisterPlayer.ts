@@ -1,6 +1,6 @@
 import axios from 'axios'
 import getPlayer from './getPlayer'
-import { Player } from '../types'
+import { Player } from '../shared/types'
 
 type GetOrRegisterPlayerProps = {
   name: string

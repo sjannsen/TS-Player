@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Game, Player } from '../types'
+import { Game, Player } from '../shared/types'
 import logger from '../utils/logger'
 
 export default async function joinGame(game: Game, player: Player) {

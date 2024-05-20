@@ -1,4 +1,4 @@
-import { Player } from '../types'
+import { Player } from '../shared/types'
 
 export type ErrorEvent = {
   playerId: string
