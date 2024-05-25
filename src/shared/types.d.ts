@@ -13,6 +13,6 @@ export type Player = {
 
 type Direction = 'NORTH' | 'SOUTH' | 'EAST' | 'WEST'
 
-type RessourceType = 'COAL' | 'IRON' | 'GEM' | 'GOLD' | 'PLATIN'
+type ResourceType = 'COAL' | 'IRON' | 'GEM' | 'GOLD' | 'PLATIN'
 
 export type UpgradeType = 'STORAGE' | 'HEALTH' | 'DAMAGE' | 'MINING_SPEED' | 'MINING' | 'MAX_ENERGY' | 'ENERGY_REGEN'
