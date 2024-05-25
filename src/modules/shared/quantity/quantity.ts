@@ -23,5 +23,6 @@ export default function makeQuantity({ amount = 0 }: makeQuantityProps): Quantit
     getAmount: () => amount,
     add,
     reduce,
+    toString: () => `${amount}`,
   })
 }
