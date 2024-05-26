@@ -26,6 +26,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2",
     "@types/amqplib": "^0.10.5",
     "amqplib": "^0.10.4",
     "axios": "^1.6.8",
