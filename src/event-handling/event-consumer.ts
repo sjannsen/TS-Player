@@ -1,7 +1,7 @@
 import ampqlib from 'amqplib'
 import logger from '../utils/logger'
 import { EventContext, EventHeader, EventPayload, EventTypes } from './events'
-import EventBus from './eventBus'
+import EventBus from './event-bus'
 
 const rabbitMQConfig = {
   protocol: 'amqp',
@@ -77,7 +77,6 @@ export default async function setUpRabbitMQ(playerId: string, playerExchange: st
       },
     }
 
-    logger.info(eventType, 'Publish event')
     EventBus.publish(eventType, context)
     channel.ack(message)
   })
