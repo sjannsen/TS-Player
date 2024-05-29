@@ -1,4 +1,4 @@
-import eventBus from '../../event-handling/eventBus'
+import eventBus from '../../event-handling/event-bus'
 import { EventContext } from '../../event-handling/events'
 import logger from '../../utils/logger'
 

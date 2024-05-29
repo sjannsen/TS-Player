@@ -20,6 +20,7 @@ const getBalance = makeGetBalance({ getBankAccount })
 const getTransactionHistory = makeGetTransactionHistory({ getBankAccount })
 
 const bankAccountService = Object.freeze({
+  createBankAccount,
   depositMoney,
   withdrawMoney,
   getBalance,
@@ -27,4 +28,4 @@ const bankAccountService = Object.freeze({
 })
 
 export default bankAccountService
-export { depositMoney, getBalance, getTransactionHistory, withdrawMoney }
+export { createBankAccount, depositMoney, getBalance, getTransactionHistory, withdrawMoney }

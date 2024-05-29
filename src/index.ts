@@ -1,7 +1,8 @@
 import axios from 'axios'
 import dotenv from 'dotenv'
 import { clearSetUp, setUpGame, startGame } from './development-setup'
-import setUpRabbitMQ from './event-handling/EventHandler'
+import setUpRabbitMQ from './event-handling/event-consumer'
+import setUpEventListeners from './event-handling/setup-event-listener'
 import { joinNextGameAvailable, setUpPlayer } from './setup'
 import { setUpStateHandlers } from './setup/setUpStateHandlers'
 import { updatePlayerConfig } from './shared/config'
@@ -55,9 +56,10 @@ async function main() {
   await setUpRabbitMQ(player.playerId, player.playerExchange)
   updatePlayerConfig(player)
 
-  const game: Game = await joinNextGameAvailable()
-
   setUpStateHandlers()
+  setUpEventListeners()
+
+  const game: Game = await joinNextGameAvailable()
   if (devMode) await startGame(game.gameId)
 }
 main()
