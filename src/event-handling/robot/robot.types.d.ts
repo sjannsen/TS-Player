@@ -1,4 +1,4 @@
-type RobotFightResult = {
+type RobotFightResultPayload = {
   robotId: string
   availableHealth: number
   availableEnergy: number
@@ -22,26 +22,7 @@ type RevealedRobotLevels = {
   storageLevel: number
 }
 
-type RobotLevels = {
-  healthLevel: number
-  damageLevel: number
-  miningSpeedLevel: number
-  miningLevel: number
-  energyLevel: number
-  energyRegenLevel: number
-}
-
-type RobotAttributes = {
-  maxHealth: number
-  maxEnergy: number
-  energyRegen: number
-  attackDamage: number
-  miningSpeed: number
-  health: number
-  energy: number
-}
-
-type RobotInventory = {
+type RobotInventoryPayload = {
   storageLevel: number
   usedStorage: number
   maxStorage: number
@@ -49,20 +30,12 @@ type RobotInventory = {
   resources: InventoryResources
 }
 
-type InventoryResources = {
-  COAL: number
-  IRON: number
-  GEM: number
-  GOLD: number
-  PLATIN: number
-}
-
 type FullRobot = {
   planet: Planet
-  inventory: RobotInventory
-} & Robot
+  inventory: RobotInventoryPayload
+} & RobotPayload
 
-type Robot = {
+type RobotPayload = {
   id: string
   alive: boolean
   player: string
