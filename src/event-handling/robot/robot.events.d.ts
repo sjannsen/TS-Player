@@ -1,6 +1,6 @@
 type RobotAttackedEvent = {
-  attacker: RobotFightResult
-  target: RobotFightResult
+  attacker: RobotFightResultPayload
+  target: RobotFightResultPayload
 }
 
 type RobotMovedEvent = {
