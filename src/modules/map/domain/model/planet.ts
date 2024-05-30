@@ -1,3 +1,4 @@
+import { ResourceType } from '../../../../shared/types'
 import { PlanetExceedsCurrentResourceError, PlanetInvalidArgumentError } from './planet.erros'
 
 export type PlanetResource = {
@@ -16,8 +17,7 @@ export type NeighborPlanets = {
 export type Planet = {
   getId: () => string
   getMapServiceId: () => string
-  getX: () => number
-  getY: () => number
+  getCoordinates: () => { x: number | undefined; y: number | undefined }
   getMovementDifficulty: () => number
   getResource: () => PlanetResource | undefined
   getNeighborPlanets: () => NeighborPlanets
@@ -36,8 +36,8 @@ type MakePlanetDependencies = {
 type MakePlanetProps = {
   id?: string
   mapServiceId: string
-  x: number
-  y: number
+  x?: number
+  y?: number
   movementDifficulty: number
   resource: PlanetResource
   neighborPlanets?: NeighborPlanets
@@ -55,8 +55,8 @@ export default function buildMakePlanet({ Id }: MakePlanetDependencies) {
   }: MakePlanetProps): Planet {
     if (!Id.isValidId(id)) throw new PlanetInvalidArgumentError(`The planetId is invalid: ${id}`)
     if (!mapServiceId) throw new PlanetInvalidArgumentError(`The mapServiceId is invalid: ${mapServiceId}`)
-    if (x < 0) throw new PlanetInvalidArgumentError(`The x coordinate must not be negative: ${x}`)
-    if (y < 0) throw new PlanetInvalidArgumentError(`The x coordinate must not be negative: ${y}`)
+    if (x && x < 0) throw new PlanetInvalidArgumentError(`The x coordinate must not be negative: ${x}`)
+    if (y && y < 0) throw new PlanetInvalidArgumentError(`The x coordinate must not be negative: ${y}`)
     if (movementDifficulty <= 0)
       throw new PlanetInvalidArgumentError(`The movement difficulty must not be negative: ${movementDifficulty}`)
     if (movementDifficulty > 3)
@@ -76,8 +76,7 @@ export default function buildMakePlanet({ Id }: MakePlanetDependencies) {
     return Object.freeze({
       getId: () => id,
       getMapServiceId: () => mapServiceId,
-      getX: () => x,
-      getY: () => y,
+      getCoordinates: () => ({ x, y }) ?? undefined,
       getMovementDifficulty: () => movementDifficulty,
       getResource: () => resourceState,
       getNeighborPlanets: () => neighborPlanets,

@@ -9,8 +9,8 @@ type CreatePlanetDependencies = {
 type CreatePlanetProps = {
   id?: string
   mapServiceId: string
-  x: number
-  y: number
+  x?: number
+  y?: number
   movementDifficulty: number
   resource: PlanetResource
   neighborPlanets?: NeighborPlanets
