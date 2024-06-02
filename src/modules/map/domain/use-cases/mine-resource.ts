@@ -12,7 +12,7 @@ type MineResourceProps = {
 
 export default function makeMineResource({ planetDb }: MineResourceDependencies) {
   return function mineResource({ id, amount }: MineResourceProps) {
-    const planet = planetDb.find({ id })
+    const planet = planetDb.find({ mapServiceId: id })
 
     if (!planet) throw new PlanetNotFoundError(`Planet with Id: ${id} does not exist`)
 

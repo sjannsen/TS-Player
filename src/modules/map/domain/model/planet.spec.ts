@@ -9,8 +9,7 @@ describe('makePlanet', () => {
     const planet = makePlanet({ mapServiceId: 'mapId', x: 0, y: 0, movementDifficulty: 1, resource })
 
     expect(planet.getMapServiceId()).toBe('mapId')
-    expect(planet.getX()).toBe(0)
-    expect(planet.getY()).toBe(0)
+    expect(planet.getCoordinates()).toStrictEqual({ x: 0, y: 0 })
     expect(planet.getMovementDifficulty()).toBe(1)
     expect(planet.getResource()).toBe(resource)
     expect(planet.getNeighborPlanets()).toEqual({
@@ -33,8 +32,7 @@ describe('makePlanet', () => {
     const planet = makePlanet({ mapServiceId: 'mapId', x: 0, y: 0, movementDifficulty: 1, resource, neighborPlanets })
 
     expect(planet.getMapServiceId()).toBe('mapId')
-    expect(planet.getX()).toBe(0)
-    expect(planet.getY()).toBe(0)
+    expect(planet.getCoordinates()).toStrictEqual({ x: 0, y: 0 })
     expect(planet.getMovementDifficulty()).toBe(1)
     expect(planet.getResource()).toBe(resource)
     expect(planet.getNeighborPlanets()).toEqual(neighborPlanets)
@@ -55,8 +53,7 @@ describe('makePlanet', () => {
     const planet = makePlanet({ mapServiceId: 'mapId', x: 0, y: 0, movementDifficulty: 1, resource, neighborPlanets })
 
     expect(planet.getMapServiceId()).toBe('mapId')
-    expect(planet.getX()).toBe(0)
-    expect(planet.getY()).toBe(0)
+    expect(planet.getCoordinates()).toStrictEqual({ x: 0, y: 0 })
     expect(planet.getMovementDifficulty()).toBe(1)
     expect(planet.getResource()).toBe(resource)
     expect(planet.getNeighborPlanets()).toEqual(neighborPlanets)

@@ -22,6 +22,7 @@ const props = {
     miningLevel: 1,
     energyLevel: 1,
     energyRegenLevel: 1,
+    storageLevel: 1,
   },
   inventory: {
     storageLevel: 1,

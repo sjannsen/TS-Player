@@ -1,3 +1,4 @@
+import { ResourceType } from '../../../../shared/types'
 import { PlanetInvalidArgumentError } from '../model/planet.erros'
 import { PlanetDb } from './types'
 
