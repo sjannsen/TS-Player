@@ -1,5 +1,7 @@
+import { UpgradeType } from '../../../../shared/types'
 import makeRobot from '../models'
 import { RobotInvalidArgumentError, RobotNotFoundError } from '../models/robot.errors'
+import { RobotLevels } from '../models/types'
 import { extractRobotProps } from '../utils'
 import { RobotDb } from './types'
 

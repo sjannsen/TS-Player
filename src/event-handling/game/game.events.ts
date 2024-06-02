@@ -1,16 +1,19 @@
-type GameStatusEvent = {
+import { GameStatus } from '../events'
+import { RoundStatus } from './game.types'
+
+export type GameStatusEvent = {
   gameId: string
   gameworldId: string
   status: GameStatus
 }
 
-type PlayerStatusEvent = {
+export type PlayerStatusEvent = {
   playerId: string
   gameId: string
   name: string
 }
 
-type RoundStatusEvent = {
+export type RoundStatusEvent = {
   gameId: string
   roundId: string
   roundNumber: number
@@ -22,7 +25,7 @@ type RoundStatusEvent = {
   }
 }
 
-type CommandDispatchedEvent = {
+export type CommandDispatchedEvent = {
   commandId: string
   player: {
     playerId: string

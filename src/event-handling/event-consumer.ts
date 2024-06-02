@@ -1,7 +1,7 @@
 import ampqlib from 'amqplib'
 import logger from '../utils/logger'
-import { EventContext, EventHeader, EventPayload, EventTypes } from './events'
 import EventBus from './event-bus'
+import { EventContext, EventHeader, EventPayload, EventType } from './events'
 
 const rabbitMQConfig = {
   protocol: 'amqp',
@@ -22,7 +22,8 @@ export default async function setUpRabbitMQ(playerId: string, playerExchange: st
 
   connection.on('close', () => {
     logger.warn('[AMQP]: Connection closed. Reconnecting to player queue...')
-    setUpRabbitMQ(playerId, playerExchange)
+    setTimeout(() => setUpRabbitMQ(playerId, playerExchange), 5000)
+    // setUpRabbitMQ(playerId, playerExchange)
   })
 
   connection.on('connection', (stream) => {
@@ -81,8 +82,6 @@ export default async function setUpRabbitMQ(playerId: string, playerExchange: st
     channel.ack(message)
   })
 }
-
-type EventType = keyof EventTypes
 
 function mapEventPayload<T extends EventType>(payload: unknown): EventPayload<T> {
   return payload as EventPayload<T>

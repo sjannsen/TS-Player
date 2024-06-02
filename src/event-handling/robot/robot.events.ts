@@ -1,53 +1,63 @@
-type RobotAttackedEvent = {
+import { InventoryResources } from '../../modules/robot/domain/models/types'
+import {
+  FullRobot,
+  PlanetMovement,
+  ResourceType,
+  RevealedRobotLevels,
+  RobotFightResultPayload,
+  UpgradeType,
+} from './robot.types'
+
+export type RobotAttackedEvent = {
   attacker: RobotFightResultPayload
   target: RobotFightResultPayload
 }
 
-type RobotMovedEvent = {
+export type RobotMovedEvent = {
   robotId: string
   remainingEnergy: number
   fromPlanet: PlanetMovement
   toPlanet: PlanetMovement
 }
 
-type RobotRegeneratedEvent = {
+export type RobotRegeneratedEvent = {
   robotId: string
   availableEnergy: number
 }
 
-type RobotResourceMinedEvent = {
+export type RobotResourceMinedEvent = {
   robotId: string
   minedAmount: number
   minedResource: ResourceType
   resourceInventory: InventoryResources
 }
 
-type RobotResourceRemovedEvent = {
+export type RobotResourceRemovedEvent = {
   robotId: string
   removedAmount: number
   removedResource: ResourceType
   resourceInventory: InventoryResources
 }
 
-type RobotRestoredAttributesEvent = {
+export type RobotRestoredAttributesEvent = {
   robotId: string
   restorationType: 'HEALTH' | 'ENERGY'
   availableEnergy: number
   availableHealth: number
 }
 
-type RobotSpawnedEvent = {
+export type RobotSpawnedEvent = {
   robot: FullRobot
 }
 
-type RobotUpgradedEvent = {
+export type RobotUpgradedEvent = {
   robotId: string
   level: number
   upgrade: UpgradeType
   robot: FullRobot
 }
 
-type RobotsRevealed = {
+export type RobotsRevealed = {
   robotId: string
   planetId: string
   playerNotion: string
@@ -56,4 +66,4 @@ type RobotsRevealed = {
   levels: RevealedRobotLevels
 }
 
-type RobotsRevealedEvent = Array<RobotsRevealed>
+export type RobotsRevealedEvent = Array<RobotsRevealed>

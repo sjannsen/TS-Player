@@ -1,4 +1,22 @@
 import { Player } from '../shared/types'
+import { PlayerStatusEvent, RoundStatusEvent, CommandDispatchedEvent } from './game/game.events'
+import {
+  GameworldCreatedEvent,
+  GameworldStatusChangedEvent,
+  ResourceMinedEvent,
+  PlanetDiscoveredEvent,
+} from './map/map.events'
+import {
+  RobotAttackedEvent,
+  RobotMovedEvent,
+  RobotRegeneratedEvent,
+  RobotResourceMinedEvent,
+  RobotResourceRemovedEvent,
+  RobotRestoredAttributesEvent,
+  RobotSpawnedEvent,
+  RobotUpgradedEvent,
+  RobotsRevealedEvent,
+} from './robot/robot.events'
 
 export type ErrorEvent = {
   playerId: string
@@ -35,11 +53,11 @@ interface EventTypes {
   error: ErrorEvent
 }
 
-type EventType = keyof EventTypes
+export type EventType = keyof EventTypes
 
-type EventPayload<T extends EventType> = T extends keyof EventTypes ? EventTypes[T] : unknown
+export type EventPayload<T extends EventType> = T extends keyof EventTypes ? EventTypes[T] : unknown
 
-type EventHeader = {
+export type EventHeader = {
   type: EventType
   eventId: string
   transactionId: string
@@ -58,9 +76,9 @@ export type EventContext<T extends keyof EventTypes> = {
   playerContext: Player
 }
 
-type GameStatus = 'created' | 'started' | 'ended'
+export type GameStatus = 'created' | 'started' | 'ended'
 
-type GameStatusEvent = {
+export type GameStatusEvent = {
   gameId: string
   gameworldId: string
   status: GameStatus

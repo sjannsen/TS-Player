@@ -1,20 +1,19 @@
-type GameworldStatus = 'ACTIVE' | 'INACTIVE'
+export type GameworldStatus = 'ACTIVE' | 'INACTIVE'
 
-type ResourceType = 'COAL' | 'IRON' | 'GEM' | 'GOLD' | 'PLATIN'
-
-type MinedResource = {
+export type ResourceType = 'COAL' | 'IRON' | 'GEM' | 'GOLD' | 'PLATIN'
+export type MinedResource = {
   type: ResourceType
   maxAmount: number
   currentAmount: number
 }
 
-type Resource = {
+export type Resource = {
   type: ResourceType
   maxAmount: number
   currentAmount: number
 }
 
-type Planet = {
+export type Planet = {
   id: string
   x: number
   y: number
@@ -22,15 +21,15 @@ type Planet = {
   ressource: Resource
 }
 
-type Gameworld = {
+export type Gameworld = {
   id: string
   status: GameworldStatus
   planets: Planet[]
 }
 
-type Direction = 'NORTH' | 'EAST' | 'SOUTH' | 'WEST'
+export type Direction = 'NORTH' | 'EAST' | 'SOUTH' | 'WEST'
 
-type Neighbour = {
+export type Neighbour = {
   id: string
   direction: Direction
 }

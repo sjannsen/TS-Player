@@ -1,4 +1,4 @@
-type InventoryResources = {
+export type InventoryResources = {
   COAL: number
   IRON: number
   GEM: number
@@ -6,7 +6,7 @@ type InventoryResources = {
   PLATIN: number
 }
 
-type RobotLevels = {
+export type RobotLevels = {
   healthLevel: number
   damageLevel: number
   miningSpeedLevel: number
@@ -16,7 +16,7 @@ type RobotLevels = {
   storageLevel: number
 }
 
-type RobotAttributes = {
+export type RobotAttributes = {
   maxHealth: number
   maxEnergy: number
   energyRegen: number

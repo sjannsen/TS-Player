@@ -1,21 +1,23 @@
-type GameworldCreatedEvent = {
+import { GameworldStatus, Planet, MinedResource, Neighbour, Resource } from './map.types'
+
+export type GameworldCreatedEvent = {
   id: string
   status: GameworldStatus
   planets: Planet[]
 }
 
-type GameworldStatusChangedEvent = {
+export type GameworldStatusChangedEvent = {
   id: string
   stauts: GameworldStatus
 }
 
-type ResourceMinedEvent = {
+export type ResourceMinedEvent = {
   planet: string
   minedAmount: number
   resource: MinedResource
 }
 
-type PlanetDiscoveredEvent = {
+export type PlanetDiscoveredEvent = {
   planet: string
   movementDifficulty: number
   neighbours: Array<Neighbour>

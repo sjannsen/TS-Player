@@ -1,5 +1,7 @@
+import { ResourceType } from '../../../../event-handling/robot/robot.types'
 import makeRobot from '../models'
 import { RobotInvalidArgumentError, RobotNotFoundError } from '../models/robot.errors'
+import { InventoryResources } from '../models/types'
 import { extractRobotProps } from '../utils'
 import { RobotDb } from './types'
 

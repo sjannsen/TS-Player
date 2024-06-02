@@ -1,5 +1,6 @@
 import { Id } from '../Id'
 import { RobotInvalidArgumentError } from './robot.errors'
+import { InventoryResources, RobotAttributes, RobotLevels } from './types'
 
 export type RobotInventory = {
   getStorageLevel: () => number
