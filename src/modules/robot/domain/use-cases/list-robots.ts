@@ -1,11 +1,15 @@
-import { RobotDb } from './types'
+import { QueryParams, RobotDb } from './types'
 
 type ListRobotsDependencies = {
   robotDb: RobotDb
 }
 
+type ListRobotProps = {
+  queryParams?: QueryParams
+}
+
 export default function makeListRobots({ robotDb }: ListRobotsDependencies) {
-  return function () {
-    return robotDb.findAll()
+  return function listRobots({ queryParams }: ListRobotProps) {
+    return robotDb.findAll(queryParams)
   }
 }

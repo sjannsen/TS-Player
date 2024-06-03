@@ -1,14 +1,14 @@
 import { buyRobots } from './buyRobots'
 import { engangeBattle } from './engangeBattle'
 import { mineRessources } from './mineRessources'
-import { moveRobots } from './moveRobots'
+import { moveRobot } from './moveRobot'
 
 const robotCommandService = {
   buyRobots,
   engangeBattle,
   mineRessources,
-  moveRobots,
+  moveRobot,
 }
 
 export default robotCommandService
-export { buyRobots, engangeBattle, mineRessources, moveRobots }
+export { buyRobots, engangeBattle, mineRessources, moveRobot }

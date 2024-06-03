@@ -11,7 +11,7 @@ import makeRestoreAttribute from './restore-attribute'
 import makeUpgradeRobot from './upgrade-robot'
 
 const attackRobot = makeAttackRobot({ robotDb: robotDb })
-const createdRobot = makeCreateRobot({ robotDb: robotDb })
+const createRobot = makeCreateRobot({ robotDb: robotDb })
 const getRobot = makeGetRobot({ robotDb: robotDb })
 const listRobots = makeListRobots({ robotDb: robotDb })
 const mineResource = makeMineResource({ robotDb: robotDb })
@@ -23,7 +23,7 @@ const upgradeRobot = makeUpgradeRobot({ robotDb: robotDb })
 
 const robotService = Object.freeze({
   attackRobot,
-  createdRobot,
+  createRobot,
   getRobot,
   listRobots,
   mineResource,
@@ -37,7 +37,7 @@ const robotService = Object.freeze({
 export default robotService
 export {
   attackRobot,
-  createdRobot,
+  createRobot,
   getRobot,
   listRobots,
   mineResource,
