@@ -17,13 +17,13 @@ export default async function setUpRabbitMQ(playerId: string, playerExchange: st
   const connection = await ampqlib.connect(rabbitMQConfig)
 
   connection.on('error', (error) => {
+    if (error.message === 'Connection closing') return
     logger.error(error, '[AMQP]: Error while connection to player queue')
   })
 
   connection.on('close', () => {
     logger.warn('[AMQP]: Connection closed. Reconnecting to player queue...')
-    setTimeout(() => setUpRabbitMQ(playerId, playerExchange), 5000)
-    // setUpRabbitMQ(playerId, playerExchange)
+    setUpRabbitMQ(playerId, playerExchange)
   })
 
   connection.on('connection', (stream) => {
@@ -78,8 +78,8 @@ export default async function setUpRabbitMQ(playerId: string, playerExchange: st
       },
     }
 
-    EventBus.publish(eventType, context)
     channel.ack(message)
+    EventBus.publish(eventType, context)
   })
 }
 
