@@ -1,4 +1,4 @@
-import planetDb from '../../output/data-access'
+import planetDb from '../../adapters/output/data-access'
 import makeCreatePlanet from './create-planet'
 import makeGetPlanet from './get-planet'
 import makeGetPlanets from './get-planets'

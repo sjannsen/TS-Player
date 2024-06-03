@@ -1,5 +1,5 @@
 import makeMoney from '../../../../shared/money/money'
-import bankAccountDb from '../../output/data-access'
+import bankAccountDb from '../../adapters/output/data-access'
 import makeCreateBankAccount from './create-bank-account'
 import makeDepositMoney from './deposit-money'
 import makeGetBalance from './get-balance'

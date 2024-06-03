@@ -1,5 +1,4 @@
 import { ResourceType } from '../../../../event-handling/robot/robot.types'
-import { mineRessources } from '../../output/commands'
 import makeRobot from '../models'
 import { RobotInvalidArgumentError, RobotInvalidInventory, RobotNotFoundError } from '../models/robot.errors'
 import { InventoryResources } from '../models/types'
@@ -19,7 +18,7 @@ type MineResourceProps = {
 
 export default function makeMineResource({ robotDb }: MineResourceDepencencies) {
   return function mineResource({ id, robotServiceId, minedAmount, minedResource }: MineResourceProps) {
-    if (!minedResource) throw new RobotInvalidArgumentError(`Mined resource must not be undefined: ${mineRessources}`)
+    if (!minedResource) throw new RobotInvalidArgumentError(`Mined resource must not be undefined: ${minedResource}`)
     if (!minedAmount) throw new RobotInvalidArgumentError(`Mined amount must not be undefined: ${minedAmount}`)
     if (minedAmount < 0) throw new RobotInvalidArgumentError(`Mined amount must not be negative: ${minedAmount}`)
     if (!id && !robotServiceId) throw new RobotInvalidArgumentError(`An id is needed: ${id}, ${robotServiceId}`)
