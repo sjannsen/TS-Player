@@ -1,5 +1,5 @@
 import makeAddToInventory from './add-to-inventory'
-import inventoryDb from '../../output/data-access'
+import inventoryDb from '../../adapters/output/data-access'
 import makeGetInventoryForRessource from './get-inventory-for-resource'
 import makeGetTotalAmountOfResource from './get-total-amount-of-resource'
 import makeGetTotalWorthForResource from './get-total-worth-for-resource'

@@ -1,4 +1,4 @@
-import robotDb from '../../output/data-access'
+import robotDb from '../../adapters/output/data-access'
 import makeAttackRobot from './attack-robot'
 import makeCreateRobot from './create-robot'
 import makeGetRobot from './get-robot'
