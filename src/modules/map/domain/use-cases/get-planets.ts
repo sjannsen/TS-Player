@@ -1,13 +1,13 @@
-import { Planet } from '../model/planet'
-import { PlanetDb } from './types'
+import { PlanetData } from '../model/planet'
+import { PlanetDb } from './data-access'
 
 type GetPlanetsDependencies = {
   planetDb: PlanetDb
 }
 
 export default function makeGetPlanets({ planetDb }: GetPlanetsDependencies) {
-  return function getPlanets() {
-    const planets: Planet[] = planetDb.findAll()
+  return async function getPlanets(): Promise<PlanetData[]> {
+    const planets: PlanetData[] = await planetDb.findAll()
     return planets
   }
 }

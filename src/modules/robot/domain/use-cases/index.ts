@@ -1,3 +1,5 @@
+import planetService from '../../../map/domain/use-cases'
+import inventoryService from '../../../trading/inventory/domain/use-cases'
 import robotDb from '../../adapters/output/data-access'
 import makeAttackRobot from './attack-robot'
 import makeCreateRobot from './create-robot'
@@ -14,10 +16,19 @@ const attackRobot = makeAttackRobot({ robotDb: robotDb })
 const createRobot = makeCreateRobot({ robotDb: robotDb })
 const getRobot = makeGetRobot({ robotDb: robotDb })
 const listRobots = makeListRobots({ robotDb: robotDb })
-const mineResource = makeMineResource({ robotDb: robotDb })
+const mineResource = makeMineResource({
+  robotDb: robotDb,
+  getFreeInventoryCapacity: inventoryService.getInventoryCapacity,
+  addToInventory: inventoryService.addToInventory,
+  getPlanetResource: planetService.getPlanetResource,
+  minePlanetResource: planetService.mineResource,
+})
 const moveRobot = makeMoveRobot({ robotDb: robotDb })
 const regenerateRobot = makeRegenerateRobot({ robotDb: robotDb })
-const removeResource = makeRemoveResource({ robotDb: robotDb })
+const removeResource = makeRemoveResource({
+  robotDb: robotDb,
+  removeFromInventory: inventoryService.removeFromInventory,
+})
 const restoreAttributes = makeRestoreAttribute({ robotDb: robotDb })
 const upgradeRobot = makeUpgradeRobot({ robotDb: robotDb })
 

@@ -1,22 +1,21 @@
-import makeRobot from '../models'
-import { MakeRobotProps, Robot } from '../models/robot'
-import { RobotDb } from './types'
+import { RobotData } from '../models/robot'
+import { RobotDb } from './data-access'
 
 type CreateRobotDependencies = {
   robotDb: RobotDb
 }
 
 type CreateRobotProps = {
-  robot: MakeRobotProps
+  robotData: RobotData
 }
 
 export default function makeCreateRobot({ robotDb }: CreateRobotDependencies) {
-  return function createRobot({ robot }: CreateRobotProps): Robot {
-    const exists = robotDb.find({ id: robot.id, robotServiceId: robot.robotServiceId })
+  return async function createRobot({ robotData }: CreateRobotProps): Promise<RobotData> {
+    const exists = await robotDb.findById({ id: robotData.id, robotServiceId: robotData.robotServiceId })
+
     if (exists) return exists
 
-    const createdRobot = makeRobot(robot)
-    robotDb.insert(createdRobot)
-    return createdRobot
+    const created = await robotDb.insert({ robotData })
+    return created
   }
 }

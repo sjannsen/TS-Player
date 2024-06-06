@@ -1,191 +1,216 @@
-import { Resource } from '../../../resource/domain/model/resource'
+import { InventoryResources } from '../../../../robot/domain/models/types'
+import Id from '../Id'
 import buildMakeInventory, { InventoryData } from './inventory'
-import { ExceedsCurrentInventoryError, InventoryEntryNotFoundError } from './inventory.erros'
+import {
+  InvalidStorageEntryError,
+  InventoryExceedsCurrentStorageError,
+  InventoryInvalidArgumentError,
+} from './inventory.erros'
 
-const mockRessource: Resource = {
-  getName: jest.fn().mockReturnValue('COAL'),
-  getSellingPrice: jest.fn().mockReturnValue(10),
-  updateSellingPrice: jest.fn(),
-}
+const makeInventory = buildMakeInventory({ Id: Id })
 
-const mockQuantity0: Quantity = {
-  add: jest.fn().mockReturnValue(null),
-  getAmount: jest.fn().mockReturnValue(0),
-  reduce: jest.fn().mockImplementation(() => {
-    throw new Error()
-  }),
-}
+describe('Inventory', () => {
+  describe('makeInventory', () => {
+    it('creates an inventory with valid data', () => {
+      const initialStorage = { COAL: 0, GEM: 0, GOLD: 0, IRON: 0, PLATIN: 10 }
+      const inventory = makeInventory({
+        storageLevel: 1,
+        maxStorage: 10,
+        storage: initialStorage,
+      })
 
-const mockQuantity20: Quantity = {
-  add: jest.fn().mockReturnValue(null),
-  getAmount: jest.fn().mockReturnValue(20),
-  reduce: jest.fn(),
-}
+      expect(Id.isValidId(inventory.getId())).toBeTruthy()
+      expect(inventory.isFull()).toBeTruthy()
+      expect(inventory.getFreeCapacity()).toBe(0)
+      expect(inventory.getMaxStorage()).toBe(10)
+      expect(inventory.getUsedStorage()).toBe(10)
+      expect(inventory.getStorage()).toEqual(initialStorage)
+    })
 
-const mockQuantity10: Quantity = {
-  add: jest.fn().mockReturnValue(mockQuantity20),
-  getAmount: jest.fn().mockReturnValue(10),
-  reduce: jest.fn().mockReturnValue(mockQuantity0),
-}
+    it('creates an inventory with empty storage', () => {
+      const emptyStorage = { COAL: 0, GEM: 0, GOLD: 0, IRON: 0, PLATIN: 0 }
+      const inventory = makeInventory({
+        storageLevel: 1,
+        maxStorage: 10,
+      })
 
-describe('makeInventory', () => {
-  it('creates an empty inventory', () => {
-    const makeInventory = buildMakeInventory()
+      expect(Id.isValidId(inventory.getId())).toBeTruthy()
+      expect(inventory.isFull()).toBeFalsy()
+      expect(inventory.getFreeCapacity()).toBe(10)
+      expect(inventory.getMaxStorage()).toBe(10)
+      expect(inventory.getUsedStorage()).toBe(0)
+      expect(inventory.getStorage()).toEqual(emptyStorage)
+    })
 
-    const inventory = makeInventory({ resource: mockRessource, initialInventory: {} })
+    it('throws an error when id is invalid', () => {
+      const invalidInventoryData: InventoryData = {
+        id: 'invalidId',
+        maxStorage: 10,
+        storageLevel: 10,
+      }
+      expect(() => makeInventory(invalidInventoryData)).toThrow(InventoryInvalidArgumentError)
+    })
 
-    expect(inventory.getRessource()).toBe(mockRessource)
-    expect(inventory.getTotalAmount()).toBe(0)
-    expect(inventory.getTotalWorth()).toBe(0)
-    expect(inventory.getInventory()).toEqual({})
+    it('throws an error when is storageLevel is undefined', () => {
+      const invalidInventoryData = {
+        maxStorage: 10,
+      } as InventoryData
+      expect(() => makeInventory(invalidInventoryData)).toThrow(InventoryInvalidArgumentError)
+    })
+
+    it('throws an error when is storageLevel is negative', () => {
+      const invalidInventoryData: InventoryData = {
+        id: 'invalidId',
+        maxStorage: 10,
+        storageLevel: -10,
+      }
+      expect(() => makeInventory(invalidInventoryData)).toThrow(InventoryInvalidArgumentError)
+    })
+
+    it('throws an error when is maxStorage is undefined', () => {
+      const invalidInventoryData: InventoryData = {
+        id: 'invalidId',
+        storageLevel: 10,
+      } as InventoryData
+      expect(() => makeInventory(invalidInventoryData)).toThrow(InventoryInvalidArgumentError)
+    })
+
+    it('throws an error when is maxStorage is negative', () => {
+      const invalidInventoryData: InventoryData = {
+        id: 'invalidId',
+        maxStorage: -10,
+        storageLevel: 10,
+      }
+      expect(() => makeInventory(invalidInventoryData)).toThrow(InventoryInvalidArgumentError)
+    })
+
+    it('throws an error when storage contains undefined amount', () => {
+      const invalidStorage = { COAL: 0, GEM: undefined, GOLD: 0, IRON: 0, PLATIN: 10 } as unknown as InventoryResources
+      const invalidInventoryData: InventoryData = {
+        maxStorage: 10,
+        storageLevel: 10,
+        storage: invalidStorage,
+      }
+      expect(() => makeInventory(invalidInventoryData)).toThrow(InvalidStorageEntryError)
+    })
+
+    it('throws an error when storage contains negative amount', () => {
+      const invalidStorage = { COAL: 0, GEM: -10, GOLD: 0, IRON: 0, PLATIN: 10 }
+      const invalidInventoryData: InventoryData = {
+        maxStorage: 10,
+        storageLevel: 10,
+        storage: invalidStorage,
+      }
+      expect(() => makeInventory(invalidInventoryData)).toThrow(InvalidStorageEntryError)
+    })
   })
 
-  it('creates an inventory with initial inventory', () => {
-    const initialInventory: InventoryData = {
-      robotId1: mockQuantity10,
-      robotId2: mockQuantity10,
-      robotId3: mockQuantity10,
-    }
-    const makeInventory = buildMakeInventory()
+  describe('addToStorage', () => {
+    it('adds to the storage', () => {
+      const initialStorage = { COAL: 0, GEM: 0, GOLD: 0, IRON: 0, PLATIN: 5 }
+      const inventory = makeInventory({
+        storageLevel: 1,
+        maxStorage: 10,
+        storage: initialStorage,
+      })
 
-    const inventory = makeInventory({ resource: mockRessource, initialInventory: initialInventory })
+      inventory.addToStorage({ resource: 'COAL', amountToAdd: 5 })
 
-    expect(inventory.getRessource()).toBe(mockRessource)
-    expect(inventory.getTotalAmount()).toBe(30)
-    expect(inventory.getTotalWorth()).toBe(300)
-    expect(inventory.getInventory()).toEqual(initialInventory)
-  })
-})
+      expect(inventory.getStorage().COAL).toBe(5)
+    })
 
-describe('addToInventory', () => {
-  it('adds an amount to the inventory', () => {
-    const initialInventory: InventoryData = {
-      robotId1: mockQuantity10,
-      robotId2: mockQuantity10,
-      robotId3: mockQuantity10,
-    }
-    const makeInventory = buildMakeInventory()
-    const inventory = makeInventory({ resource: mockRessource, initialInventory: initialInventory })
+    it('adds a reducet amount when amountToAdd exceeds free capacity', () => {
+      const initialStorage = { COAL: 0, GEM: 0, GOLD: 0, IRON: 0, PLATIN: 5 }
+      const inventory = makeInventory({
+        storageLevel: 1,
+        maxStorage: 10,
+        storage: initialStorage,
+      })
 
-    inventory.addToInventory({ robotId: 'robotId1', amount: mockQuantity10 })
+      inventory.addToStorage({ resource: 'COAL', amountToAdd: 15 })
 
-    expect(inventory.getRessource()).toBe(mockRessource)
-    expect(inventory.getTotalAmount()).toBe(40)
-    expect(inventory.getTotalWorth()).toBe(400)
-  })
+      expect(inventory.getStorage().COAL).toBe(5)
+    })
 
-  it('throws an error, if the amount to add is negative', () => {}) // Done by Quantity type
-})
+    it('throws an error when adding negative amount', () => {
+      const initialStorage = { COAL: 0, GEM: 0, GOLD: 0, IRON: 0, PLATIN: 5 }
+      const inventory = makeInventory({
+        storageLevel: 1,
+        maxStorage: 10,
+        storage: initialStorage,
+      })
 
-describe('removeFromInventory', () => {
-  it('removes an amount from the inventory', () => {
-    const initialInventory: InventoryData = {
-      robotId1: mockQuantity10,
-      robotId2: mockQuantity10,
-      robotId3: mockQuantity10,
-    }
-    const makeInventory = buildMakeInventory()
-    const inventory = makeInventory({ resource: mockRessource, initialInventory: initialInventory })
+      expect(() => inventory.addToStorage({ resource: 'COAL', amountToAdd: -10 })).toThrow(
+        InventoryInvalidArgumentError
+      )
+    })
 
-    inventory.removeFromInventory({ robotId: 'robotId1', amount: mockQuantity10 })
+    it('throws an error when adding undefined amount', () => {
+      const initialStorage = { COAL: 0, GEM: 0, GOLD: 0, IRON: 0, PLATIN: 5 }
+      const inventory = makeInventory({
+        storageLevel: 1,
+        maxStorage: 10,
+        storage: initialStorage,
+      })
 
-    expect(inventory.getRessource()).toBe(mockRessource)
-    expect(inventory.getTotalAmount()).toBe(20)
-    expect(inventory.getTotalWorth()).toBe(200)
-  })
-
-  it('throws an error, if the amount to remove is negative', () => {}) // Done by Quantity type
-
-  it('throws an error, if the amount to remove exceeds the current amount', () => {
-    const initialInventory: InventoryData = {
-      robotId1: mockQuantity10,
-      robotId2: mockQuantity10,
-      robotId3: mockQuantity10,
-    }
-    const makeInventory = buildMakeInventory()
-    const inventory = makeInventory({ resource: mockRessource, initialInventory: initialInventory })
-
-    expect(() => inventory.removeFromInventory({ robotId: 'robotId1', amount: mockQuantity20 })).toThrow(
-      ExceedsCurrentInventoryError
-    )
-  })
-})
-
-describe('getTotalAmount', () => {
-  it('returns the total amount of the inventory', () => {
-    const initialInventory: InventoryData = {
-      robotId1: mockQuantity10,
-      robotId2: mockQuantity10,
-      robotId3: mockQuantity10,
-    }
-    const makeInventory = buildMakeInventory()
-    const inventory = makeInventory({ resource: mockRessource, initialInventory: initialInventory })
-
-    expect(inventory.getTotalAmount()).toBe(30)
+      // @ts-expect-error Testing for invalid argument error when amountToAdd is undefined
+      expect(() => inventory.addToStorage({ resource: 'COAL', amountToAdd: undefined })).toThrow(
+        InventoryInvalidArgumentError
+      )
+    })
   })
 
-  it('returns 0 if the inventory is empty', () => {
-    const makeInventory = buildMakeInventory()
-    const inventory = makeInventory({ resource: mockRessource, initialInventory: {} })
+  describe('addToStorage', () => {
+    it('removes from the storage', () => {
+      const initialStorage = { COAL: 5, GEM: 0, GOLD: 0, IRON: 0, PLATIN: 0 }
+      const inventory = makeInventory({
+        storageLevel: 1,
+        maxStorage: 10,
+        storage: initialStorage,
+      })
 
-    expect(inventory.getTotalAmount()).toBe(0)
-  })
-})
+      inventory.removeFromStorage({ resource: 'COAL', amoutToRemove: 5 })
 
-describe('getTotalWorth', () => {
-  it('returns the total worth of the inventory', () => {
-    const initialInventory: InventoryData = {
-      robotId1: mockQuantity10,
-      robotId2: mockQuantity10,
-      robotId3: mockQuantity10,
-    }
-    const makeInventory = buildMakeInventory()
-    const inventory = makeInventory({ resource: mockRessource, initialInventory: initialInventory })
+      expect(inventory.getStorage().COAL).toBe(0)
+    })
 
-    expect(inventory.getTotalWorth()).toBe(300)
-  })
+    it('throws an error when removing more than available', () => {
+      const initialStorage = { COAL: 5, GEM: 0, GOLD: 0, IRON: 0, PLATIN: 0 }
+      const inventory = makeInventory({
+        storageLevel: 1,
+        maxStorage: 10,
+        storage: initialStorage,
+      })
 
-  it('returns 0 if the inventory is empty', () => {
-    const makeInventory = buildMakeInventory()
-    const inventory = makeInventory({ resource: mockRessource, initialInventory: {} })
+      expect(() => inventory.removeFromStorage({ resource: 'COAL', amoutToRemove: 10 })).toThrow(
+        InventoryExceedsCurrentStorageError
+      )
+    })
+    it('throws an error when removing negative amount', () => {
+      const initialStorage = { COAL: 5, GEM: 0, GOLD: 0, IRON: 0, PLATIN: 0 }
+      const inventory = makeInventory({
+        storageLevel: 1,
+        maxStorage: 10,
+        storage: initialStorage,
+      })
 
-    expect(inventory.getTotalWorth()).toBe(0)
-  })
-})
+      expect(() => inventory.removeFromStorage({ resource: 'COAL', amoutToRemove: -5 })).toThrow(
+        InventoryInvalidArgumentError
+      )
+    })
 
-describe('getInventoryForRobot', () => {
-  it('returns the inventory of a robot', () => {
-    const initialInventory: InventoryData = {
-      robotId1: mockQuantity10,
-      robotId2: mockQuantity10,
-      robotId3: mockQuantity10,
-    }
-    const makeInventory = buildMakeInventory()
-    const inventory = makeInventory({ resource: mockRessource, initialInventory: initialInventory })
+    it('throws an error when removing undefined amount', () => {
+      const initialStorage = { COAL: 5, GEM: 0, GOLD: 0, IRON: 0, PLATIN: 0 }
+      const inventory = makeInventory({
+        storageLevel: 1,
+        maxStorage: 10,
+        storage: initialStorage,
+      })
 
-    const inventoryDataEntry = inventory.getInventoryForRobot({ robotId: 'robotId1' })
-
-    expect(inventoryDataEntry.amount).toEqual(initialInventory['robotId1'])
-    expect(inventoryDataEntry.robotId).toBe('robotId1')
-    expect(inventoryDataEntry.resource).toBe(mockRessource)
-  })
-
-  it('throws an error, if the robot does not exist in inventory', () => {
-    const initialInventory: InventoryData = {
-      robotId1: mockQuantity10,
-      robotId2: mockQuantity10,
-      robotId3: mockQuantity10,
-    }
-    const makeInventory = buildMakeInventory()
-    const inventory = makeInventory({ resource: mockRessource, initialInventory: initialInventory })
-
-    expect(() => inventory.getInventoryForRobot({ robotId: 'notExistingRobotId' })).toThrow(InventoryEntryNotFoundError)
-  })
-
-  it('throws an error, if the inventory is empty', () => {
-    const makeInventory = buildMakeInventory()
-    const inventory = makeInventory({ resource: mockRessource, initialInventory: {} })
-
-    expect(() => inventory.getInventoryForRobot({ robotId: 'notExistingRobotId' })).toThrow(InventoryEntryNotFoundError)
+      // @ts-expect-error Testing for invalid argument error when amoutToRemove is undefined
+      expect(() => inventory.removeFromStorage({ resource: 'COAL', amoutToRemove: undefined })).toThrow(
+        InventoryInvalidArgumentError
+      )
+    })
   })
 })

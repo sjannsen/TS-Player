@@ -1,57 +1,76 @@
+import { ResourceType } from '../../../../event-handling/robot/robot.types'
+import { PlanetResource } from '../../../map/domain/model/planet'
 import { RobotInvalidArgumentError, RobotNotFoundError } from '../models/robot.errors'
 import makeMineResource from './mine-resource'
-import { clearMockRobotDb, mockRobot, mockRobotDb } from './mocks/mock'
+import { clearMockRobotDb, mockRobotDb } from './mocks/mock'
 
 describe('mineResource', () => {
-  const mineResource = makeMineResource({ robotDb: mockRobotDb })
+  const getPlanetResourceMock = jest
+    .fn()
+    .mockReturnValue({ type: 'COAL', currentAmount: 10, maxAmount: 10 } as PlanetResource)
+  const getFreeInventoryCapacityMock = jest.fn().mockReturnValue({ freeCapacity: 5 })
+  const addToInventoryMock = jest.fn()
+  const minePlanetResouceMock = jest.fn()
+
+  const mineResource = makeMineResource({
+    robotDb: mockRobotDb,
+    getPlanetResource: getPlanetResourceMock,
+    getFreeInventoryCapacity: getFreeInventoryCapacityMock,
+    addToInventory: addToInventoryMock,
+    minePlanetResource: minePlanetResouceMock,
+  })
 
   beforeEach(() => {
     clearMockRobotDb()
   })
 
-  it('updates the inventory and calls the data acces', () => {
-    const robot = mineResource({ robotServiceId: 'robotId', minedResource: 'COAL', minedAmount: 5 })
+  it('updates the inventory and calls the data access', async () => {
+    const robotData = await mineResource({ robotServiceId: 'robotId', minedResource: 'COAL', minedAmount: 5 })
 
-    expect(mockRobotDb.find.mock.calls.length).toBe(1)
-    expect(mockRobotDb.update.mock.calls.length).toBe(1)
-    expect(robot.getInventory().getFreeCapacity()).toBe(0)
-    expect(robot.getInventory().getStorage()['COAL']).toBe(mockRobot.getInventory().getStorage()['COAL'] + 5)
+    expect(mockRobotDb.findById.mock.calls.length).toBe(1)
+    expect(robotData.minedAmount).toBe(5)
+    expect(robotData.freeCapacityLeft).toBe(0)
   })
 
-  it('reduces the saved amount coresponding to the free capacity and calls the data access', () => {
-    const robot = mineResource({ robotServiceId: 'robotId', minedResource: 'COAL', minedAmount: 4 })
+  it('reduces the saved amount coresponding to the free capacity and calls the data access', async () => {
+    const robotData = await mineResource({ robotServiceId: 'robotId', minedResource: 'COAL', minedAmount: 10 })
 
-    expect(mockRobotDb.find.mock.calls.length).toBe(1)
-    expect(mockRobotDb.update.mock.calls.length).toBe(1)
-    expect(robot.getInventory().getFreeCapacity()).toBe(1)
-    expect(robot.getInventory().getStorage()['COAL']).toBe(mockRobot.getInventory().getStorage()['COAL'] + 4)
+    expect(mockRobotDb.findById.mock.calls.length).toBe(1)
+    expect(robotData.minedAmount).toBe(5)
+    expect(robotData.freeCapacityLeft).toBe(0)
   })
 
-  it('throws an error, if the mined resource is undefined', () => {
-    expect(() =>
+  it('throws an error when the mined resource is undefined', async () => {
+    await expect(
       mineResource({ robotServiceId: 'robotId', minedAmount: 5, minedResource: '' as ResourceType })
-    ).toThrow(RobotInvalidArgumentError)
+    ).rejects.toThrow(RobotInvalidArgumentError)
   })
 
-  it('throws an error, if the mined amount is undefined', () => {
-    expect(() =>
+  it('throws an error when the mined amount is undefined', async () => {
+    await expect(
       mineResource({ robotServiceId: 'robotId', minedAmount: undefined as unknown as number, minedResource: 'COAL' })
-    ).toThrow(RobotInvalidArgumentError)
+    ).rejects.toThrow(RobotInvalidArgumentError)
   })
 
-  it('throws an error, if the mined amount is negative', () => {
-    expect(() => mineResource({ robotServiceId: 'robotId', minedAmount: -5, minedResource: 'COAL' })).toThrow(
+  it('throws an error when the mined amount is negative', async () => {
+    await expect(mineResource({ robotServiceId: 'robotId', minedAmount: -5, minedResource: 'COAL' })).rejects.toThrow(
       RobotInvalidArgumentError
     )
   })
 
-  it('throws an error, if no id is passed', () => {
-    expect(() => mineResource({ minedAmount: 5, minedResource: 'COAL' })).toThrow(RobotInvalidArgumentError)
+  it('throws an error when no id is passed', async () => {
+    await expect(mineResource({ minedAmount: 5, minedResource: 'COAL' })).rejects.toThrow(RobotInvalidArgumentError)
   })
 
-  it('throws an error, if the robot is not existing', () => {
-    expect(() => mineResource({ robotServiceId: 'invalidRobotId', minedAmount: 5, minedResource: 'COAL' })).toThrow(
-      RobotNotFoundError
-    )
+  it('throws an error when the robot is not existing', async () => {
+    await expect(
+      mineResource({ robotServiceId: 'invalidRobotId', minedAmount: 5, minedResource: 'COAL' })
+    ).rejects.toThrow(RobotNotFoundError)
+  })
+
+  it('throws an error when the resource to mine does not exist on the planet', async () => {
+    await expect(
+      mineResource({ robotServiceId: 'invalidRobotId', minedAmount: 5, minedResource: 'GEM' })
+    ).rejects.toThrow(RobotNotFoundError)
   })
 })

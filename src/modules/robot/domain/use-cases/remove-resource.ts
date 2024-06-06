@@ -1,12 +1,21 @@
 import { ResourceType } from '../../../../event-handling/robot/robot.types'
-import makeRobot from '../models'
+import { InventoryData } from '../../../trading/inventory/domain/model/inventory'
 import { RobotInvalidArgumentError, RobotNotFoundError } from '../models/robot.errors'
-import { InventoryResources } from '../models/types'
-import { extractRobotProps } from '../utils'
-import { RobotDb } from './types'
+import { RobotDb } from './data-access'
+
+type RemoveFromInventory = ({
+  inventoryId,
+  resource,
+  amount,
+}: {
+  inventoryId: string
+  resource: ResourceType
+  amount: number
+}) => Promise<InventoryData | null>
 
 type RemoveResourceDependencies = {
   robotDb: RobotDb
+  removeFromInventory: RemoveFromInventory
 }
 
 type RemoveResourceProps = {
@@ -16,42 +25,30 @@ type RemoveResourceProps = {
   amount: number
 }
 
-export default function makeRemoveResource({ robotDb }: RemoveResourceDependencies) {
-  return function removeResource({ id, robotServiceId, resource, amount }: RemoveResourceProps) {
-    if (!id && !robotServiceId) throw new RobotInvalidArgumentError(`An id is needed: ${id}, ${robotServiceId}`)
-    if (!resource) throw new RobotInvalidArgumentError(`The resource to remove must be provided: ${resource}`)
-    if (!amount) throw new RobotInvalidArgumentError(`The amount remove must be provided: ${amount}`)
-    if (amount < 0) throw new RobotInvalidArgumentError(`The amount remove must not be negative: ${amount}`)
+export default function makeRemoveResource({ robotDb, removeFromInventory }: RemoveResourceDependencies) {
+  return async function removeResource({
+    id,
+    robotServiceId,
+    resource,
+    amount,
+  }: RemoveResourceProps): Promise<{ removedAmount: number }> {
+    const IDS_UNDEFINED_ERROR = `Id: ${id} and robotServiceId: ${robotServiceId} are undefined`
+    const RESOURCE_UNDEFINED_ERROR = `The resource to remove is undefined: ${resource}`
+    const AMOUNT_UNDEFINED_ERROR = `The amountToRemove is undefined: ${amount}`
+    const AMOUNT_NEGATIVE_ERROR = `The amountToRemove is negative: ${amount}`
 
-    const existingRobot = robotDb.find({ id, robotServiceId })
-    if (!existingRobot) throw new RobotNotFoundError(`Robot with id: ${robotServiceId} not found`)
+    if (!id && !robotServiceId) throw new RobotInvalidArgumentError(IDS_UNDEFINED_ERROR)
+    if (!resource) throw new RobotInvalidArgumentError(RESOURCE_UNDEFINED_ERROR)
+    if (!amount) throw new RobotInvalidArgumentError(AMOUNT_UNDEFINED_ERROR)
+    if (amount < 0) throw new RobotInvalidArgumentError(AMOUNT_NEGATIVE_ERROR)
 
-    const existingRobotInventory = existingRobot.getInventory()
+    const existing = await robotDb.findById({ id, robotServiceId })
+    if (!existing) throw new RobotNotFoundError(`Robot with id: ${robotServiceId} not found`)
 
-    if (amount > existingRobotInventory.getStorage()[resource])
-      throw new RobotInvalidArgumentError(
-        `Amount to remove must not exceed the current storage: ${amount}, current storage: ${existingRobotInventory.getStorage()[resource]}`
-      )
+    const inventoryId = existing.inventoryId
+    if (!inventoryId) throw new Error(`Inventory for Robot: ${id} does not exist`)
+    await removeFromInventory({ inventoryId, resource, amount })
 
-    let amountToRemove = amount
-    if (amountToRemove > existingRobotInventory.getUsedStorage())
-      amountToRemove = existingRobotInventory.getUsedStorage()
-
-    const storage: Partial<InventoryResources> = {
-      [resource]: existingRobotInventory.getStorage()[resource] - amountToRemove,
-    }
-
-    const existingProps = extractRobotProps({ robot: existingRobot })
-    const robot = makeRobot({
-      ...existingProps,
-      inventory: {
-        maxStorage: existingProps.inventory.maxStorage,
-        storageLevel: existingProps.inventory.storageLevel,
-        storage: { ...existingProps.inventory.storage, ...storage },
-      },
-    })
-
-    robotDb.update(robot)
-    return robot
+    return { removedAmount: amount }
   }
 }

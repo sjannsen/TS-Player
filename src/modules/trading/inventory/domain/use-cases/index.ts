@@ -1,36 +1,23 @@
-import makeAddToInventory from './add-to-inventory'
 import inventoryDb from '../../adapters/output/data-access'
-import makeGetInventoryForRessource from './get-inventory-for-resource'
-import makeGetTotalAmountOfResource from './get-total-amount-of-resource'
-import makeGetTotalWorthForResource from './get-total-worth-for-resource'
+import makeAddToInventory from './add-to-inventory'
+import makeCreateInventory from './create-inventory'
+import makeGetInventory from './get-inventory'
+import makeGetInventoryCapacity from './get-inventory-capacity'
 import makeRemoveFromInventory from './remove-from-inventory'
-import makeGetTotalWorth from './get-total-worth'
 
 const addToInventory = makeAddToInventory({ inventoryDb })
-const getInventoryForRessource = makeGetInventoryForRessource({ inventoryDb })
-const getInventoryForRobot = makeGetInventoryForRessource({ inventoryDb })
-const getTotalAmountOfResource = makeGetTotalAmountOfResource({ inventoryDb })
-const getTotalWorth = makeGetTotalWorth({ inventoryDb })
-const getTotalWorthForResource = makeGetTotalWorthForResource({ inventoryDb })
+const createInventory = makeCreateInventory({ inventoryDb })
+const getInventory = makeGetInventory({ inventoryDb })
+const getInventoryCapacity = makeGetInventoryCapacity({ inventoryDb })
 const removeFromInventory = makeRemoveFromInventory({ inventoryDb })
 
 const inventoryService = Object.freeze({
   addToInventory,
-  getInventoryForRessource,
-  getInventoryForRobot,
-  getTotalAmountOfResource,
-  getTotalWorth,
-  getTotalWorthForResource,
+  createInventory,
+  getInventory,
+  getInventoryCapacity,
   removeFromInventory,
 })
 
 export default inventoryService
-export {
-  addToInventory,
-  getInventoryForRessource,
-  getInventoryForRobot,
-  getTotalAmountOfResource,
-  getTotalWorth,
-  getTotalWorthForResource,
-  removeFromInventory,
-}
+export { addToInventory, createInventory, getInventory, getInventoryCapacity, removeFromInventory }

@@ -1,6 +1,7 @@
 import makeRobot from '.'
 import Id from '../Id'
 import { RobotInvalidArgumentError } from './robot.errors'
+import { RobotAttributes, RobotLevels } from './types'
 
 const props = {
   robotServiceId: 'robotId',
@@ -24,17 +25,6 @@ const props = {
     energyRegenLevel: 1,
     storageLevel: 1,
   },
-  inventory: {
-    storageLevel: 1,
-    maxStorage: 10,
-    storage: {
-      COAL: 1,
-      IRON: 1,
-      GEM: 1,
-      GOLD: 1,
-      PLATIN: 1,
-    },
-  },
   currentPlanet: 'planetId',
 }
 
@@ -48,9 +38,6 @@ describe('makeRobot', () => {
     expect(robot.isAlive()).toBe(props.alive)
     expect(robot.getAttributes()).toEqual(props.attributes)
     expect(robot.getLevels()).toEqual(props.levels)
-    expect(robot.getInventory().getMaxStorage()).toEqual(props.inventory.maxStorage)
-    expect(robot.getInventory().getStorageLevel()).toEqual(props.inventory.storageLevel)
-    expect(robot.getInventory().getStorage()).toEqual(props.inventory.storage)
   })
 
   it('create a robot with id', () => {
@@ -64,9 +51,6 @@ describe('makeRobot', () => {
     expect(robot.isAlive()).toBe(props.alive)
     expect(robot.getAttributes()).toEqual(props.attributes)
     expect(robot.getLevels()).toEqual(props.levels)
-    expect(robot.getInventory().getMaxStorage()).toEqual(props.inventory.maxStorage)
-    expect(robot.getInventory().getStorageLevel()).toEqual(props.inventory.storageLevel)
-    expect(robot.getInventory().getStorage()).toEqual(props.inventory.storage)
   })
 
   it('throws an error, if the given id is invalid', () => {
@@ -93,63 +77,5 @@ describe('makeRobot', () => {
   it('throws an error, if any level is negativ', () => {
     const invalidLevels: RobotLevels = { damageLevel: -10 } as RobotLevels
     expect(() => makeRobot({ ...props, levels: invalidLevels })).toThrow(RobotInvalidArgumentError)
-  })
-
-  it('throws an error, if any storage entry is negativ', () => {
-    const invalidStorage: InventoryResources = { COAL: -10 } as InventoryResources
-    const invalidInventory = {
-      inventory: {
-        storageLevel: 1,
-        maxStorage: 1,
-        storage: invalidStorage,
-      },
-    }
-    expect(() => makeRobot({ ...props, ...invalidInventory })).toThrow(RobotInvalidArgumentError)
-  })
-})
-
-describe('robot inventory', () => {
-  it('knows, when it is full', () => {
-    const robot = makeRobot({ ...props })
-    expect(robot.getInventory().isFull()).toBe(false)
-  })
-
-  it('knows, when it is not full', () => {
-    const fullStorage: InventoryResources = { COAL: 5 } as InventoryResources
-    const fullInventory = {
-      inventory: {
-        storageLevel: 1,
-        maxStorage: 5,
-        storage: fullStorage,
-      },
-    }
-    const robot = makeRobot({ ...props, ...fullInventory })
-    expect(robot.getInventory().isFull()).toBe(true)
-  })
-
-  it('returns the free capacity when not full', () => {
-    const fullStorage: InventoryResources = { COAL: 3 } as InventoryResources
-    const fullInventory = {
-      inventory: {
-        storageLevel: 1,
-        maxStorage: 5,
-        storage: fullStorage,
-      },
-    }
-    const robot = makeRobot({ ...props, ...fullInventory })
-    expect(robot.getInventory().getFreeCapacity()).toBe(2)
-  })
-
-  it('returns the free capacity when full', () => {
-    const fullStorage: InventoryResources = { COAL: 5 } as InventoryResources
-    const fullInventory = {
-      inventory: {
-        storageLevel: 1,
-        maxStorage: 5,
-        storage: fullStorage,
-      },
-    }
-    const robot = makeRobot({ ...props, ...fullInventory })
-    expect(robot.getInventory().getFreeCapacity()).toBe(0)
   })
 })

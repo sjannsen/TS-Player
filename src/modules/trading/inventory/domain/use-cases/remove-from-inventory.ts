@@ -1,25 +1,41 @@
+import { ResourceType } from '../../../../../shared/types'
+import makeInventory from '../model'
+import { InventoryData } from '../model/inventory'
 import { InventoryInvalidArgumentError, InventoryNotFoundError } from '../model/inventory.erros'
-import { InventoryDb } from './types'
+import { InventoryDb } from './data-access'
 
 type RemoveFromInventoryDependencies = {
   inventoryDb: InventoryDb
 }
 
 type RemoveFromInventoryProps = {
-  resourceName: ResourceType
-  robotId: string
-  amount: Quantity
+  inventoryId: string
+  resource: ResourceType
+  amount: number
 }
 
 export default function makeRemoveFromInventory({ inventoryDb }: RemoveFromInventoryDependencies) {
-  return function removeFromInventory({ resourceName, robotId, amount }: RemoveFromInventoryProps) {
-    if (!resourceName) throw new InventoryInvalidArgumentError(`ResourceName is invalid: ${resourceName}`)
-    if (!robotId) throw new InventoryInvalidArgumentError(`RobotId is invalid: ${robotId}`)
+  return async function removeFromInventory({
+    resource,
+    inventoryId: id,
+    amount,
+  }: RemoveFromInventoryProps): Promise<InventoryData> {
+    if (!id) throw new InventoryInvalidArgumentError(`InventoryId is invalid: ${id}`)
+    if (!resource) throw new InventoryInvalidArgumentError(`ResourceName is invalid: ${resource}`)
 
-    const inventory = inventoryDb.find(resourceName)
-    if (!inventory) throw new InventoryNotFoundError(`Inventory for resource: ${resourceName} does not exist`)
+    const existing = await inventoryDb.findById({ id })
+    if (!existing) throw new InventoryNotFoundError(`Inventory with id: ${id} does not exist`)
 
-    inventory.removeFromInventory({ robotId, amount })
-    inventoryDb.update(inventory)
+    const inventory = makeInventory({ ...existing })
+    inventory.removeFromStorage({ resource, amoutToRemove: amount })
+
+    const updated = await inventoryDb.update({
+      inventoryData: {
+        id: inventory.getId(),
+        storage: inventory.getStorage(),
+      },
+    })
+
+    return { ...existing, ...updated }
   }
 }

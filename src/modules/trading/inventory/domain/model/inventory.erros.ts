@@ -5,31 +5,17 @@ class InventoryError extends Error {
   }
 }
 
-class NegativePriceError extends InventoryError {
-  constructor(message: string = 'A price must be greater than 0') {
-    super(message)
-    this.name = 'NegativePriceError'
-  }
-}
-
-class ExceedsCurrentInventoryError extends InventoryError {
+class InventoryExceedsCurrentStorageError extends InventoryError {
   constructor(message: string = 'The amount exceeds the current inventory') {
     super(message)
-    this.name = 'ExceedsCurrentInventoryError'
+    this.name = 'InventoryExceedsCurrentStorageError'
   }
 }
 
-class InvalidInventoryDataError extends InventoryError {
-  constructor(message: string = 'Inventory data is invalid') {
+class InvalidStorageEntryError extends InventoryError {
+  constructor(message: string = 'Storage entry is invalid') {
     super(message)
-    this.name = 'InvalidInventoryData'
-  }
-}
-
-class InventoryEntryNotFoundError extends InventoryError {
-  constructor(message: string = 'Inventory data entry not found') {
-    super(message)
-    this.name = 'InventoryEntryNotFoundError'
+    this.name = 'InvalidStorageEntryError'
   }
 }
 
@@ -48,11 +34,9 @@ class InventoryInvalidArgumentError extends InventoryError {
 }
 
 export {
+  InvalidStorageEntryError,
   InventoryError,
-  NegativePriceError,
-  ExceedsCurrentInventoryError,
-  InvalidInventoryDataError,
-  InventoryEntryNotFoundError,
-  InventoryNotFoundError,
+  InventoryExceedsCurrentStorageError,
   InventoryInvalidArgumentError,
+  InventoryNotFoundError,
 }

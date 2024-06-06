@@ -1,8 +1,8 @@
 import makeRobot from '../models'
+import { RobotData } from '../models/robot'
 import { RobotInvalidArgumentError, RobotNotFoundError } from '../models/robot.errors'
 import { RobotAttributes } from '../models/types'
-import { extractRobotProps } from '../utils'
-import { RobotDb } from './types'
+import { RobotDb } from './data-access'
 
 type RestoreAttributeDependencies = {
   robotDb: RobotDb
@@ -17,39 +17,35 @@ type RestoreAttributeProps = {
 }
 
 export default function makeRestoreAttribute({ robotDb }: RestoreAttributeDependencies) {
-  return function restoreAttribute({
+  return async function restoreAttribute({
     id,
     robotServiceId,
     restorationType,
     availableEnergy,
     availableHealth,
-  }: RestoreAttributeProps) {
-    if (!id && !robotServiceId) throw new RobotInvalidArgumentError(`An id is needed: ${id}, ${robotServiceId}`)
-    if (!robotServiceId) throw new RobotInvalidArgumentError(`RobotServiceId must not be undefined: ${robotServiceId}`)
-    if (!restorationType)
-      throw new RobotInvalidArgumentError(`RestorationType must not be undefined: ${restorationType}`)
-    if (!availableEnergy && !availableHealth)
-      throw new RobotInvalidArgumentError(
-        `AvailableEnergy or availableEnergy must not be provided: Energy: ${availableEnergy}, Health: ${availableHealth}`
-      )
+  }: RestoreAttributeProps): Promise<RobotData> {
+    const idsUndefinedError = `Id: ${id} and robotServiceId: ${robotServiceId} are undefined`
+    const restorationTypeUndefinedError = `RestorationType: ${restorationType} is undefined`
+    const restorationValuesUndefinedError = `AvailableEnergy: ${availableEnergy} or availableHealth: ${availableHealth} must be provided`
+    const restorationTypeHealthValueUndefinedError = `RestorationType HEALTH must provide availableHealth must not be undefined: ${availableHealth}`
+    const restorationTypeEnergyValueUndefinedError = `RestorationType ENERGY must provide availableEnergy must not be undefined: ${availableEnergy}`
+
+    if (!id && !robotServiceId) throw new RobotInvalidArgumentError(idsUndefinedError)
+    if (!restorationType) throw new RobotInvalidArgumentError(restorationTypeUndefinedError)
+    if (!availableEnergy && !availableHealth) throw new RobotInvalidArgumentError(restorationValuesUndefinedError)
     if (restorationType == 'HEALTH' && !availableHealth)
-      throw new RobotInvalidArgumentError(
-        `RestorationType HEALTH must provide availableHealth must not be undefined: ${availableHealth}`
-      )
+      throw new RobotInvalidArgumentError(restorationTypeHealthValueUndefinedError)
     if (restorationType == 'ENERGY' && !availableEnergy)
-      throw new RobotInvalidArgumentError(
-        `RestorationType ENERGY must provide availableEnergy must not be undefined: ${availableEnergy}`
-      )
+      throw new RobotInvalidArgumentError(restorationTypeEnergyValueUndefinedError)
 
     if (availableEnergy && availableEnergy < 0)
       throw new RobotInvalidArgumentError(`AvailableEnergy must not be negative: ${availableEnergy}`)
     if (availableHealth && availableHealth < 0)
       throw new RobotInvalidArgumentError(`AvailableHealth must not be negative: ${availableHealth}`)
 
-    const existingRobot = robotDb.find({ id, robotServiceId })
-    if (!existingRobot) throw new RobotNotFoundError(`Robot with id: ${robotServiceId} not found`)
+    const existing = await robotDb.findById({ id, robotServiceId })
+    if (!existing) throw new RobotNotFoundError(`Robot with id: ${robotServiceId} not found`)
 
-    const existingProps = extractRobotProps({ robot: existingRobot })
     let updatedAttributes: Partial<RobotAttributes> = {}
 
     if (availableHealth && !availableEnergy) updatedAttributes = { health: availableHealth }
@@ -57,11 +53,12 @@ export default function makeRestoreAttribute({ robotDb }: RestoreAttributeDepend
     if (availableHealth && availableEnergy) updatedAttributes = { energy: availableEnergy, health: availableHealth }
 
     const robot = makeRobot({
-      ...existingProps,
-      ...{ attributes: { ...existingProps.attributes, ...updatedAttributes } },
+      ...existing,
+      ...{ attributes: { ...existing.attributes, ...updatedAttributes } },
     })
 
-    robotDb.update(robot)
-    return robot
+    const updated = await robotDb.update({ id: robot.getId(), attributes: robot.getAttributes() })
+
+    return { ...existing, ...updated }
   }
 }

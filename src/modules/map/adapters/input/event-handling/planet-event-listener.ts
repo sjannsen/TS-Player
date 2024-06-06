@@ -29,7 +29,7 @@ export default function setUpPlanetEventListeners() {
   eventBus.subscribe('ResourceMined', ({ event }) => {
     const { planet, minedAmount } = event.payload
     try {
-      planetService.mineResource({ id: planet, amount: minedAmount })
+      planetService.mineResource({ mapServiceId: planet, amount: minedAmount })
     } catch (error) {
       logger.error(error, 'Error while processing ResourceMined event')
       process.exit(5)
