@@ -8,6 +8,7 @@ const inventoryDb: InventoryDb = {
   update: ({ inventoryData }: { inventoryData: Partial<InventoryData> }) =>
     new Promise((resolve) => resolve({} as InventoryData)),
   findById: ({ id }: { id: string }) => new Promise((resolve) => resolve({} as InventoryData)),
+  findByRobotId: ({ id }: { id: string }) => new Promise((resolve) => ({}) as InventoryData),
   findAll: () => new Promise((resolve) => resolve([])),
 }
 
