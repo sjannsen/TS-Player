@@ -26,4 +26,17 @@ class PlanetNotFoundError extends PlanetError {
   }
 }
 
-export { PlanetError, PlanetExceedsCurrentResourceError, PlanetInvalidArgumentError, PlanetNotFoundError }
+class PlanetNotAllowedOperationError extends PlanetError {
+  constructor(message: string = 'The called operation is not allowed') {
+    super(message)
+    this.name = 'PlanetNotAllowedOperationError'
+  }
+}
+
+export {
+  PlanetError,
+  PlanetExceedsCurrentResourceError,
+  PlanetInvalidArgumentError,
+  PlanetNotAllowedOperationError,
+  PlanetNotFoundError,
+}

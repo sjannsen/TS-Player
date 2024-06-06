@@ -1,5 +1,6 @@
+import { ResourceType } from '../../../../../shared/types'
 import Id from '../../Id'
-import { PlanetResource } from '../../model/planet'
+import { PlanetData, PlanetResource } from '../../model/planet'
 
 const mockPlanetResource: PlanetResource = {
   type: 'COAL',
@@ -7,68 +8,43 @@ const mockPlanetResource: PlanetResource = {
   maxAmount: 100,
 }
 
-type MockPlanet = {
-  getId: jest.Mock
-  getMapServiceId: jest.Mock
-  getX: jest.Mock
-  getY: jest.Mock
-  getMovementDifficulty: jest.Mock
-  getResource: jest.Mock
-  getNeighborPlanets: jest.Mock
-  mineResource: jest.Mock
-}
+const mockPlanetId = Id.makeId()
 
-const mockPlanet: MockPlanet = {
-  getId: jest.fn().mockReturnValue(Id.makeId()),
-  getMapServiceId: jest.fn().mockReturnValue('mapId'),
-  getMovementDifficulty: jest.fn().mockReturnValue(1),
-  getX: jest.fn().mockReturnValue(0),
-  getY: jest.fn().mockReturnValue(0),
-  getNeighborPlanets: jest
-    .fn()
-    .mockReturnValue({ NORTH: undefined, EAST: undefined, SOUTH: undefined, WEST: undefined }),
-  getResource: jest.fn().mockReturnValue(mockPlanetResource),
-  mineResource: jest.fn(),
-}
-
-const clearMockPlanet = () => {
-  mockPlanet.getId.mockClear()
-  mockPlanet.getMapServiceId.mockClear()
-  mockPlanet.getMovementDifficulty.mockClear()
-  mockPlanet.getX.mockClear()
-  mockPlanet.getY.mockClear()
-  mockPlanet.getNeighborPlanets.mockClear()
-  mockPlanet.getResource.mockClear()
-  mockPlanet.mineResource.mockClear()
+const mockPlanet: PlanetData = {
+  id: mockPlanetId,
+  mapServiceId: 'mapId',
+  movementDifficulty: 1,
+  x: 0,
+  y: 0,
+  neighborPlanets: { NORTH: undefined, EAST: undefined, SOUTH: undefined, WEST: undefined },
+  resource: mockPlanetResource,
 }
 
 export type MockPlanetDb = {
-  find: jest.Mock
+  findById: jest.Mock
   findAll: jest.Mock
   insert: jest.Mock
   update: jest.Mock
 }
 
 const mockPlanetDb: MockPlanetDb = {
-  find: jest.fn().mockImplementation((queryParams: { id?: string; mapServiceId?: string; resource?: ResourceType }) => {
-    if (
-      queryParams.resource === 'COAL' ||
-      queryParams.mapServiceId === 'mapId' ||
-      queryParams.id === mockPlanet.getId()
-    )
-      return mockPlanet
-    return undefined
-  }),
+  findById: jest
+    .fn()
+    .mockImplementation((queryParams: { id?: string; mapServiceId?: string; resource?: ResourceType }) => {
+      if (queryParams.resource === 'COAL' || queryParams.mapServiceId === 'mapId' || queryParams.id === mockPlanetId)
+        return Promise.resolve(mockPlanet)
+      return Promise.resolve(undefined)
+    }),
   update: jest.fn().mockReturnValue(mockPlanet),
   findAll: jest.fn().mockReturnValue([mockPlanet]),
   insert: jest.fn().mockReturnValue(mockPlanet),
 }
 
 const clearMockPlanetDb = () => {
-  mockPlanetDb.find.mockClear()
+  mockPlanetDb.findById.mockClear()
   mockPlanetDb.update.mockClear()
   mockPlanetDb.findAll.mockClear()
   mockPlanetDb.insert.mockClear()
 }
 
-export { clearMockPlanet, clearMockPlanetDb, mockPlanet, mockPlanetDb, mockPlanetResource }
+export { clearMockPlanetDb, mockPlanet, mockPlanetDb, mockPlanetResource }

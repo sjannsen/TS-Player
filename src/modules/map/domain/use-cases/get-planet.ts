@@ -1,6 +1,6 @@
-import { ResourceType } from '../../../../shared/types'
+import { PlanetData } from '../model/planet'
 import { PlanetInvalidArgumentError } from '../model/planet.erros'
-import { PlanetDb } from './types'
+import { PlanetDb } from './data-access'
 
 type GetPlanetDependencies = {
   planetDb: PlanetDb
@@ -9,14 +9,15 @@ type GetPlanetDependencies = {
 type GetPlanetProps = {
   id?: string
   mapServiceId?: string
-  resource?: ResourceType
 }
 
 export default function makeGetPlanet({ planetDb }: GetPlanetDependencies) {
-  return function getPlanet(queryParams: GetPlanetProps) {
+  return async function getPlanet(queryParams: GetPlanetProps): Promise<PlanetData | null> {
     if (!queryParams || Object.keys(queryParams).length === 0)
-      throw new PlanetInvalidArgumentError(`Query params must not be undefined: ${queryParams}`)
-    const planet = planetDb.find(queryParams)
+      throw new PlanetInvalidArgumentError(`Query params are undefined: ${queryParams}`)
+
+    const planet = await planetDb.findById(queryParams)
+
     return planet
   }
 }

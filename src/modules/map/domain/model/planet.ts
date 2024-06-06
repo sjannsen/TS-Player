@@ -1,5 +1,9 @@
 import { ResourceType } from '../../../../shared/types'
-import { PlanetExceedsCurrentResourceError, PlanetInvalidArgumentError } from './planet.erros'
+import {
+  PlanetExceedsCurrentResourceError,
+  PlanetInvalidArgumentError,
+  PlanetNotAllowedOperationError,
+} from './planet.erros'
 
 export type PlanetResource = {
   type: ResourceType
@@ -33,13 +37,13 @@ type MakePlanetDependencies = {
   Id: Id
 }
 
-type MakePlanetProps = {
+export type PlanetData = {
   id?: string
   mapServiceId: string
   x?: number
   y?: number
   movementDifficulty: number
-  resource: PlanetResource
+  resource?: PlanetResource
   neighborPlanets?: NeighborPlanets
 }
 
@@ -52,24 +56,33 @@ export default function buildMakePlanet({ Id }: MakePlanetDependencies) {
     movementDifficulty,
     resource,
     neighborPlanets = { NORTH: undefined, EAST: undefined, SOUTH: undefined, WEST: undefined },
-  }: MakePlanetProps): Planet {
-    if (!Id.isValidId(id)) throw new PlanetInvalidArgumentError(`The planetId is invalid: ${id}`)
-    if (!mapServiceId) throw new PlanetInvalidArgumentError(`The mapServiceId is invalid: ${mapServiceId}`)
-    if (x && x < 0) throw new PlanetInvalidArgumentError(`The x coordinate must not be negative: ${x}`)
-    if (y && y < 0) throw new PlanetInvalidArgumentError(`The x coordinate must not be negative: ${y}`)
-    if (movementDifficulty <= 0)
-      throw new PlanetInvalidArgumentError(`The movement difficulty must not be negative: ${movementDifficulty}`)
-    if (movementDifficulty > 3)
-      throw new PlanetInvalidArgumentError(`The movement difficulty must be smaller than: ${movementDifficulty}`)
+  }: PlanetData): Planet {
+    const ID_INVALID_ERROR = `The Id: ${id} is invalid`
+    const MAP_SERVICE_ID_INVALID_ERROR = `The mapServiceId: ${mapServiceId} is invalid`
+    const X_NEGATIVE_ERROR = `The x-coordinate: ${x} is negative`
+    const Y_NEGATIVE_ERROR = `The y-coordinate: ${y} is negative`
+    const MOVEMENT_DIFFICULTY_NEGATIVE_ERROR = `The movementDifficulty: ${movementDifficulty} is negative`
+    const MOVEMENT_DIFFICULTY_EXCEEDING_LIMIT_ERROR = `The movementDifficulty: ${movementDifficulty} exceeds the limit`
+
+    if (!Id.isValidId(id)) throw new PlanetInvalidArgumentError(ID_INVALID_ERROR)
+    if (!mapServiceId) throw new PlanetInvalidArgumentError(MAP_SERVICE_ID_INVALID_ERROR)
+    if (x && x < 0) throw new PlanetInvalidArgumentError(X_NEGATIVE_ERROR)
+    if (y && y < 0) throw new PlanetInvalidArgumentError(Y_NEGATIVE_ERROR)
+    if (movementDifficulty <= 0) throw new PlanetInvalidArgumentError(MOVEMENT_DIFFICULTY_NEGATIVE_ERROR)
+    if (movementDifficulty > 3) throw new PlanetInvalidArgumentError(MOVEMENT_DIFFICULTY_EXCEEDING_LIMIT_ERROR)
 
     const resourceState = resource
 
     const mineResource = (amount: number) => {
-      if (amount < 0) throw new PlanetInvalidArgumentError(`Amount to mine must not be negative: ${amount}`)
+      const NOT_ALLOWED_MINE_ERROR = `The planet has no resource to mine`
+      const MINING_AMOUNT_NEGATIVE_ERROR = `The amountToMine: ${amount} is negative`
+      const MINING_AMOUNT_EXCEEDING_LIMIT_ERROR = `The amountToMine: ${amount} exceeds the planet resources: ${resourceState?.currentAmount}`
+
+      if (!resourceState) throw new PlanetNotAllowedOperationError(NOT_ALLOWED_MINE_ERROR)
+      if (amount < 0) throw new PlanetInvalidArgumentError(MINING_AMOUNT_NEGATIVE_ERROR)
       if (amount > resourceState.currentAmount)
-        throw new PlanetExceedsCurrentResourceError(
-          `Amount to mine: ${amount} exceeds current amount: ${resourceState.currentAmount}`
-        )
+        throw new PlanetExceedsCurrentResourceError(MINING_AMOUNT_EXCEEDING_LIMIT_ERROR)
+
       resourceState.currentAmount -= amount
     }
 

@@ -1,22 +1,33 @@
+import makePlanet from '../model'
 import { PlanetNotFoundError } from '../model/planet.erros'
-import { PlanetDb } from './types'
+import { PlanetDb } from './data-access'
 
 type MineResourceDependencies = {
   planetDb: PlanetDb
 }
 
 type MineResourceProps = {
-  id: string
+  mapServiceId: string
   amount: number
 }
 
+const mineResourceErrorMessage = 'Error while mining resource of planet'
 export default function makeMineResource({ planetDb }: MineResourceDependencies) {
-  return function mineResource({ id, amount }: MineResourceProps) {
-    const planet = planetDb.find({ mapServiceId: id })
+  return async function mineResource({ mapServiceId, amount }: MineResourceProps) {
+    const existing = await planetDb.findById({ mapServiceId })
+    const planetNotExistingError = `${mineResourceErrorMessage}: Planet with Id: ${mapServiceId} does not exist`
+    if (!existing) throw new PlanetNotFoundError(planetNotExistingError)
 
-    if (!planet) throw new PlanetNotFoundError(`Planet with Id: ${id} does not exist`)
-
+    const planet = makePlanet({ ...existing })
     planet.mineResource(amount)
-    planetDb.update(planet)
+
+    const updated = await planetDb.update({
+      planetData: {
+        id: planet.getId(),
+        resource: planet.getResource(),
+      },
+    })
+
+    return { ...existing, ...updated }
   }
 }

@@ -1,33 +1,38 @@
 import { ResourceType } from '../../../../../shared/types'
-import { Planet } from '../../../domain/model/planet'
-import { PlanetDb } from '../../../domain/use-cases/types'
+import { PlanetData } from '../../../domain/model/planet'
+import { PlanetDb } from '../../../domain/use-cases/data-access'
 
-const planetData: Planet[] = []
+const planetDataStorage: PlanetData[] = []
 
-const matchesId = (id: string | undefined, planet: Planet) => !id || id === planet.getId()
-const matchesMapServiceId = (mapServiceId: string | undefined, planet: Planet) =>
-  !mapServiceId || mapServiceId === planet.getMapServiceId()
+const matchesId = (id: string | undefined, planet: PlanetData) => !id || id === planet.id
+const matchesMapServiceId = (mapServiceId: string | undefined, planet: PlanetData) =>
+  !mapServiceId || mapServiceId === planet.mapServiceId
 
-function find({ id, mapServiceId }: { id?: string; mapServiceId?: string; resource?: ResourceType }) {
-  return planetData.find((planet) => matchesId(id, planet) && matchesMapServiceId(mapServiceId, planet))
-}
-
-function insert(planet: Planet) {
-  planetData.push(planet)
+async function find({ id, mapServiceId }: { id?: string; mapServiceId?: string; resource?: ResourceType }) {
+  const planet = planetDataStorage.find((planet) => matchesId(id, planet) && matchesMapServiceId(mapServiceId, planet))
+  if (!planet) return null
   return planet
 }
 
-function update(planet: Planet) {
-  const index = planetData.findIndex(
-    (p) => p.getId() == planet.getId() && p.getMapServiceId() == planet.getMapServiceId()
-  )
-  planetData[index] = planet
-  return planet
+async function insert({ planetData }: { planetData: PlanetData }) {
+  planetDataStorage.push(planetData)
+  return planetData
+}
+
+async function update({ planetData }: { planetData: Partial<PlanetData> }) {
+  const index = planetDataStorage.findIndex((p) => p.id == planetData.id && p.mapServiceId == planetData.mapServiceId)
+
+  if (!index) return null
+
+  const planet = planetDataStorage[index]
+  planetDataStorage[index] = { ...planet, ...planetData }
+
+  return planetDataStorage[index]
 }
 
 const planetDb: PlanetDb = {
-  find,
-  findAll: () => planetData,
+  findById: find,
+  findAll: async () => planetDataStorage,
   insert,
   update,
 }

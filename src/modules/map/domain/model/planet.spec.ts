@@ -38,6 +38,24 @@ describe('makePlanet', () => {
     expect(planet.getNeighborPlanets()).toEqual(neighborPlanets)
   })
 
+  it('creates a planet without coordinates', () => {
+    const neighborPlanet = makePlanet({ mapServiceId: 'mapId', movementDifficulty: 1, resource })
+    const neighborPlanets: NeighborPlanets = {
+      NORTH: neighborPlanet.getId(),
+      EAST: undefined,
+      SOUTH: undefined,
+      WEST: undefined,
+    }
+
+    const planet = makePlanet({ mapServiceId: 'mapId', movementDifficulty: 1, resource, neighborPlanets })
+
+    expect(planet.getMapServiceId()).toBe('mapId')
+    expect(planet.getCoordinates()).toStrictEqual({ x: undefined, y: undefined })
+    expect(planet.getMovementDifficulty()).toBe(1)
+    expect(planet.getResource()).toBe(resource)
+    expect(planet.getNeighborPlanets()).toEqual(neighborPlanets)
+  })
+
   it('creates a planet with multiple neighbor planets', () => {
     const neighborPlanet = makePlanet({ mapServiceId: 'mapId', x: 0, y: 0, movementDifficulty: 1, resource })
     const neighborPlanet2 = makePlanet({ mapServiceId: 'mapId', x: 0, y: 0, movementDifficulty: 2, resource })
