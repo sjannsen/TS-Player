@@ -1,4 +1,4 @@
-import { connectToMongoDB } from '../../../../../db/connection'
+import { connectToMongoDB } from '../../../../../db/mongoDB-connection'
 import makeRobotsDatabase from './robots-database'
 
 const robotsDb = makeRobotsDatabase({ makeDb: connectToMongoDB })
