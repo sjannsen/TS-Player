@@ -1,10 +1,10 @@
-import { MakeRobotProps } from '../models/robot'
+import { RobotData } from '../models/robot'
 import makeCreateRobot from './create-robot'
 import { clearMockRobotDb, mockRobot, mockRobotDb } from './mocks/mock'
 
 describe('createRobot', () => {
   const createdRobot = makeCreateRobot({ robotDb: mockRobotDb })
-  const robotProps: MakeRobotProps = {
+  const robotData: RobotData = {
     robotServiceId: 'newId',
     alive: true,
     attributes: {
@@ -27,36 +27,25 @@ describe('createRobot', () => {
     },
     currentPlanet: 'planetId',
     player: 'player',
-    inventory: {
-      maxStorage: 10,
-      storageLevel: 5,
-      storage: {
-        COAL: 2,
-        GEM: 2,
-        GOLD: 1,
-        IRON: 0,
-        PLATIN: 0,
-      },
-    },
   }
 
   beforeEach(() => {
     clearMockRobotDb()
   })
 
-  it('creates a robot, if not existing and calls data access', () => {
-    createdRobot({ robot: robotProps })
+  it('creates a robot, if not existing and calls data access', async () => {
+    await createdRobot({ robotData: robotData })
 
-    expect(mockRobotDb.find.mock.calls.length).toBe(1)
-    expect(mockRobotDb.find.mock.calls[0][0]).toStrictEqual({ id: undefined, robotServiceId: 'newId' })
+    expect(mockRobotDb.findById.mock.calls.length).toBe(1)
+    expect(mockRobotDb.findById.mock.calls[0][0]).toStrictEqual({ id: undefined, robotServiceId: 'newId' })
     expect(mockRobotDb.insert.mock.calls.length).toBe(1)
   })
 
-  it('returns existing robot', () => {
-    const robot = createdRobot({ robot: { ...robotProps, robotServiceId: 'robotId' } })
+  it('returns existing robot', async () => {
+    const robot = await createdRobot({ robotData: { ...robotData, robotServiceId: 'robotId' } })
 
-    expect(mockRobotDb.find.mock.calls.length).toBe(1)
-    expect(mockRobotDb.find.mock.calls[0][0]).toStrictEqual({ id: undefined, robotServiceId: 'robotId' })
+    expect(mockRobotDb.findById.mock.calls.length).toBe(1)
+    expect(mockRobotDb.findById.mock.calls[0][0]).toStrictEqual({ id: undefined, robotServiceId: 'robotId' })
     expect(mockRobotDb.insert.mock.calls.length).toBe(0)
     expect(robot).toEqual(mockRobot)
   })

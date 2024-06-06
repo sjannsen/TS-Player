@@ -1,8 +1,8 @@
 import logger from '../../../../utils/logger'
 import makeRobot from '../models'
+import { RobotData } from '../models/robot'
 import { RobotInvalidArgumentError, RobotNotFoundError } from '../models/robot.errors'
-import { extractRobotProps } from '../utils'
-import { RobotDb } from './types'
+import { RobotDb } from './data-access'
 
 type MoveRobotDependencies = {
   robotDb: RobotDb
@@ -16,23 +16,30 @@ type MoveRobotProps = {
 }
 
 export default function makeMoveRobot({ robotDb }: MoveRobotDependencies) {
-  return function moveRobot({ id, robotServiceId, planetToMove, movementDifficulty }: MoveRobotProps) {
-    if (!id && !robotServiceId) throw new RobotInvalidArgumentError(`An id is needed: ${id}, ${robotServiceId}`)
-    if (!planetToMove) throw new RobotInvalidArgumentError(`A planet to move must be provided: ${planetToMove}`)
-    if (!movementDifficulty)
-      throw new RobotInvalidArgumentError(`Movement difficulty must be provided: ${movementDifficulty}`)
+  return async function moveRobot({
+    id,
+    robotServiceId,
+    planetToMove,
+    movementDifficulty,
+  }: MoveRobotProps): Promise<RobotData> {
+    const IDS_UNDEFINED_ERROR = `Id: ${id} and robotServiceId: ${robotServiceId} are undefined`
+    const PLANET_TO_MOVE_UNDEFINED_ERROR = `PlanetToMove is undefined: ${planetToMove}`
+    const MOVEMENT_DIFFICULTY_UNDEFINED_ERROR = `MovementDifficulty is undefined: ${movementDifficulty}`
 
-    const existingRobot = robotDb.find({ id, robotServiceId })
-    if (!existingRobot) throw new RobotNotFoundError(`Robot with id: ${robotServiceId} not found`)
+    if (!id && !robotServiceId) throw new RobotInvalidArgumentError(IDS_UNDEFINED_ERROR)
+    if (!planetToMove) throw new RobotInvalidArgumentError(PLANET_TO_MOVE_UNDEFINED_ERROR)
+    if (!movementDifficulty) throw new RobotInvalidArgumentError(MOVEMENT_DIFFICULTY_UNDEFINED_ERROR)
 
-    const existingRobotProps = extractRobotProps({ robot: existingRobot })
+    const existing = await robotDb.findById({ id, robotServiceId })
+    if (!existing) throw new RobotNotFoundError(`Robot with id: ${robotServiceId} not found`)
+
     const robot = makeRobot({
-      ...existingRobotProps,
+      ...existing,
       currentPlanet: planetToMove,
       ...{
         attributes: {
-          ...existingRobotProps.attributes,
-          energy: existingRobotProps.attributes.energy - movementDifficulty,
+          ...existing.attributes,
+          energy: existing.attributes.energy - movementDifficulty,
         },
       },
     })
@@ -44,13 +51,19 @@ export default function makeMoveRobot({ robotDb }: MoveRobotDependencies) {
           energy: robot.getAttributes().energy,
           energyLost: movementDifficulty,
         },
-        from: existingRobot.getCurrentPlanet(),
+        from: existing.currentPlanet,
         to: robot.getCurrentPlanet(),
       },
       'Robot moved with loss of energy'
     )
 
-    robotDb.update(robot)
-    return robot
+    const updated = await robotDb.update({
+      id: robot.getId(),
+      robotServiceId: robot.getRobotServiceId(),
+      currentPlanet: robot.getCurrentPlanet(),
+      attributes: robot.getAttributes(),
+    })
+
+    return { ...existing, ...updated }
   }
 }

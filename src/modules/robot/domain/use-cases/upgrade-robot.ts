@@ -1,9 +1,9 @@
 import { UpgradeType } from '../../../../shared/types'
 import makeRobot from '../models'
+import { RobotData } from '../models/robot'
 import { RobotInvalidArgumentError, RobotNotFoundError } from '../models/robot.errors'
 import { RobotLevels } from '../models/types'
-import { extractRobotProps } from '../utils'
-import { RobotDb } from './types'
+import { RobotDb } from './data-access'
 
 type UpgradeRobotDependencies = {
   robotDb: RobotDb
@@ -38,21 +38,28 @@ function convertUpgradeTypeToLevel(upgrade: UpgradeType): keyof RobotLevels | un
 }
 
 export default function makeUpgradeRobot({ robotDb }: UpgradeRobotDependencies) {
-  return function upgradeRobot({ id, robotServiceId, level, upgrade }: UpgradeRobotProps) {
-    if (!id && !robotServiceId) throw new RobotInvalidArgumentError(`An id is needed: ${id}, ${robotServiceId}`)
-    if (!level) throw new RobotInvalidArgumentError(`Level must not be undefined: ${level}`)
-    if (!upgrade) throw new RobotInvalidArgumentError(`Upgrade must not be undefined: ${upgrade}`)
+  return async function upgradeRobot({ id, robotServiceId, level, upgrade }: UpgradeRobotProps): Promise<RobotData> {
+    const IDS_UNDEFINED_ERROR = `Id: ${id} and robotServiceId: ${robotServiceId} are undefined`
+    const LEVEL_UNDEFINED_ERROR = `Level: ${level} is undefined`
+    const UPGRADE_UNDEFINED_ERROR = `Upgrade: ${upgrade} is undefined`
 
-    const existingRobot = robotDb.find({ id, robotServiceId })
-    if (!existingRobot) throw new RobotNotFoundError(`Robot with id: ${robotServiceId} not found`)
+    if (!id && !robotServiceId) throw new RobotInvalidArgumentError(IDS_UNDEFINED_ERROR)
+    if (!level) throw new RobotInvalidArgumentError(LEVEL_UNDEFINED_ERROR)
+    if (!upgrade) throw new RobotInvalidArgumentError(UPGRADE_UNDEFINED_ERROR)
 
-    const existingProps = extractRobotProps({ robot: existingRobot })
+    const existing = await robotDb.findById({ id, robotServiceId })
+    if (!existing) throw new RobotNotFoundError(`Robot with id: ${id}, robotServiceId: ${robotServiceId} not found`)
+
     const levelType = convertUpgradeTypeToLevel(upgrade)
-    if (!levelType) throw new RobotInvalidArgumentError(`A valid upgrade type must be provided: ${upgrade}`)
+    if (!levelType) throw new RobotInvalidArgumentError(`LevelType: ${levelType} is invalid`)
 
-    const robot = makeRobot({ ...existingProps, levels: { ...existingProps.levels, ...{ [levelType]: level } } })
+    const robot = makeRobot({ ...existing, levels: { ...existing.levels, ...{ [levelType]: level } } })
 
-    robotDb.update(robot)
-    return robot
+    const updated = await robotDb.update({
+      id: robot.getId(),
+      levels: robot.getLevels(),
+    })
+
+    return { ...existing, ...updated }
   }
 }

@@ -1,15 +1,16 @@
-import { QueryParams, RobotDb } from './types'
+import { RobotData } from '../models/robot'
+import { RobotDb } from './data-access'
 
 type ListRobotsDependencies = {
   robotDb: RobotDb
 }
 
 type ListRobotProps = {
-  queryParams?: QueryParams
+  owner: { owner?: 'Player' | 'Enemy' }
 }
 
 export default function makeListRobots({ robotDb }: ListRobotsDependencies) {
-  return function listRobots({ queryParams }: ListRobotProps) {
-    return robotDb.findAll(queryParams)
+  return async function listRobots({ owner }: ListRobotProps): Promise<RobotData[]> {
+    return await robotDb.findAll(owner)
   }
 }
