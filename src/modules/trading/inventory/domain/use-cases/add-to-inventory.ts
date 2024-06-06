@@ -1,24 +1,41 @@
+import { ResourceType } from '../../../../../event-handling/map/map.types'
+import makeInventory from '../model'
+import { InventoryData } from '../model/inventory'
 import { InventoryInvalidArgumentError, InventoryNotFoundError } from '../model/inventory.erros'
-import { InventoryDb } from './types'
+import { InventoryDb } from './data-access'
 
 type AddToInventoryDependencies = {
   inventoryDb: InventoryDb
 }
 
 type AddToInventoryProps = {
-  resourceName: ResourceType
-  robotId: string
-  amount: Quantity
+  inventoryId: string
+  resource: ResourceType
+  amount: number
 }
 
 export default function makeAddToInventory({ inventoryDb }: AddToInventoryDependencies) {
-  return function addToInventory({ resourceName, robotId, amount }: AddToInventoryProps) {
-    if (!resourceName) throw new InventoryInvalidArgumentError(`ResourceName is invalid: ${resourceName}`)
-    if (!robotId) throw new InventoryInvalidArgumentError(`RobotId is invalid: ${robotId}`)
-    const inventory = inventoryDb.find(resourceName)
+  return async function addToInventory({
+    inventoryId: id,
+    resource,
+    amount,
+  }: AddToInventoryProps): Promise<InventoryData> {
+    if (!id) throw new InventoryInvalidArgumentError(`RobotId is invalid: ${id}`)
+    if (!resource) throw new InventoryInvalidArgumentError(`ResourceName is invalid: ${resource}`)
 
-    if (!inventory) throw new InventoryNotFoundError(`Inventory for resource: ${resourceName} does not exist`)
-    inventory.addToInventory({ robotId, amount })
-    inventoryDb.update(inventory)
+    const existing = await inventoryDb.findById({ id })
+    if (!existing) throw new InventoryNotFoundError(`Inventory: ${id} does not exist`)
+
+    const inventory = makeInventory({ ...existing })
+    inventory.addToStorage({ resource, amountToAdd: amount })
+
+    const updated = await inventoryDb.update({
+      inventoryData: {
+        id: inventory.getId(),
+        storage: inventory.getStorage(),
+      },
+    })
+
+    return { ...existing, ...updated }
   }
 }

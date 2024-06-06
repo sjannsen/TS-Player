@@ -1,6 +1,5 @@
-import { InventoryDataEntry } from '../model/inventory'
-import { InventoryInvalidArgumentError } from '../model/inventory.erros'
-import { InventoryDb } from './types'
+import { InventoryData } from '../model/inventory'
+import { InventoryDb } from './data-access'
 
 type GetInventoryForRobotDependencies = {
   inventoryDb: InventoryDb
@@ -11,17 +10,9 @@ type GetInventoryForRobotProps = {
 }
 
 export default function makeGetInventoryForRobot({ inventoryDb }: GetInventoryForRobotDependencies) {
-  return function getInventoryForRobot({ robotId }: GetInventoryForRobotProps) {
-    if (!robotId) throw new InventoryInvalidArgumentError(`RobotId is invalid: ${robotId}`)
-
-    const inventories = inventoryDb.findAll()
-    const robotInventory: InventoryDataEntry[] = []
-
-    inventories.forEach((inventory) => {
-      const inventoryDataEntry = inventory.getInventoryForRobot({ robotId })
-      robotInventory.push(inventoryDataEntry)
-    })
-
-    return robotInventory
+  return async function getInventoryForRobot({ robotId }: GetInventoryForRobotProps): Promise<InventoryData | null> {
+    const inventoryData = await inventoryDb.findByRobotId({ id: robotId })
+    if (!inventoryData) return null
+    return { ...inventoryData }
   }
 }

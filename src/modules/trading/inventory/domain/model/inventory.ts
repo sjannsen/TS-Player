@@ -1,87 +1,115 @@
-import { Resource } from '../../../resource/domain/model/resource'
-import { ExceedsCurrentInventoryError, InvalidInventoryDataError, InventoryEntryNotFoundError } from './inventory.erros'
+import { ResourceType } from '../../../../../shared/types'
+import logger from '../../../../../utils/logger'
+import { InventoryResources } from '../../../../robot/domain/models/types'
+import { Id } from '../Id'
+import {
+  InvalidStorageEntryError,
+  InventoryExceedsCurrentStorageError,
+  InventoryInvalidArgumentError,
+} from './inventory.erros'
+
+type InventoryDependencies = {
+  Id: Id
+}
 
 export type InventoryData = {
-  [robotId: string]: Quantity
+  id?: string
+  storageLevel: number
+  maxStorage: number
+  storage?: InventoryResources
 }
 
-export type InventoryDataEntry = {
-  robotId: string
-  resource: Resource
-  amount: Quantity
+export interface Inventory {
+  getId: () => string
+  getStorageLevel: () => number
+  getUsedStorage: () => number
+  getMaxStorage: () => number
+  getFreeCapacity: () => number
+  isFull: () => boolean
+  getStorage: () => InventoryResources
+  addToStorage: ({ resource, amountToAdd }: { resource: ResourceType; amountToAdd: number }) => void
+  removeFromStorage: ({ resource, amoutToRemove }: { resource: ResourceType; amoutToRemove: number }) => void
 }
 
-export type Inventory = {
-  getRessource: () => Resource
-  getTotalAmount: () => number
-  getInventory: () => InventoryData
-  getInventoryForRobot: ({ robotId }: { robotId: string }) => InventoryDataEntry
-  getTotalWorth: () => number
-  addToInventory: ({ robotId, amount }: { robotId: string; amount: Quantity }) => void
-  removeFromInventory: ({ robotId, amount }: { robotId: string; amount: Quantity }) => void
-}
+export default function buildMakeInventory({ Id }: InventoryDependencies) {
+  return function makeInventory({
+    id = Id.makeId(),
+    storageLevel,
+    maxStorage,
+    storage: initialStorage = { COAL: 0, GEM: 0, GOLD: 0, IRON: 0, PLATIN: 0 },
+  }: InventoryData) {
+    const ID_INVALID_ERROR = `Id: ${id} is invalid`
+    const STORAGE_LEVEL_UNDEFINED_ERROR = `storageLevel: ${storageLevel} is undefined`
+    const STORAGE_LEVEL_NEGATIVE_ERROR = `storageLevel: ${storageLevel} is negative`
+    const MAX_STORAGE_UNDEFINED_ERROR = `maxStorage: ${maxStorage} is undefined`
+    const MAX_STORAGE_NEGATIVE_ERROR = `maxStorage level: ${maxStorage} is negative`
+    const STORAGE_AMOUNT_UNDEFINED_ERROR = `storageAmount is undefined`
+    const STORAGE_AMOUNT_NEGATIVE_ERROR = `storageAmount is negative`
 
-type MakeRessourceProps = {
-  resource: Resource
-  initialInventory?: InventoryData
-}
+    if (!Id.isValidId(id)) throw new InventoryInvalidArgumentError(ID_INVALID_ERROR)
+    if (!storageLevel) throw new InventoryInvalidArgumentError(STORAGE_LEVEL_UNDEFINED_ERROR)
+    if (storageLevel < 0) throw new InventoryInvalidArgumentError(STORAGE_LEVEL_NEGATIVE_ERROR)
+    if (!maxStorage) throw new InventoryInvalidArgumentError(MAX_STORAGE_UNDEFINED_ERROR)
+    if (maxStorage < 0) throw new InventoryInvalidArgumentError(MAX_STORAGE_NEGATIVE_ERROR)
 
-export default function buildMakeInventory() {
-  return function makeInventory({ resource, initialInventory = {} }: MakeRessourceProps): Inventory {
-    for (const [key, value] of Object.entries(initialInventory)) {
-      if (!key || !value)
-        throw new InvalidInventoryDataError(`Key: [${key}] or value: [${value}] of initial inventory is undefined`)
+    let usedCapacity = 0
+    for (const [resource, amount] of Object.entries(initialStorage)) {
+      if (amount === undefined || amount === null)
+        throw new InvalidStorageEntryError(`${STORAGE_AMOUNT_UNDEFINED_ERROR}: ${resource} is undefined: ${amount}`)
+      if (amount < 0)
+        throw new InvalidStorageEntryError(`${STORAGE_AMOUNT_NEGATIVE_ERROR}: ${amount} of ${resource} is negative`)
+      usedCapacity += amount
     }
-    const inventory = initialInventory
 
-    const addToInventory = ({ robotId, amount }: { robotId: string; amount: Quantity }) => {
-      const currentAmount = inventory[robotId]
+    const storage = { ...initialStorage }
 
-      if (!currentAmount) throw new InventoryEntryNotFoundError('Inventory not found for robotId: ' + robotId)
+    const addToStorage = ({ resource, amountToAdd }: { resource: ResourceType; amountToAdd: number }) => {
+      const RESOURCE_UNDEFINED_ERROR = `resource is undefined`
+      const AMOUNT_TO_ADD_UNDEFINED_ERROR = `amountToAdd is undefined`
+      const AMOUNT_TO_ADD_NEGATIVE_ERROR = `amountToAdd is negative: ${amountToAdd}`
+      const AMOUNT_TO_ADD_EXCEEDS_CAPACITY_WARNING = `amountToAdd: ${amountToAdd} exceeds current capacities: ${maxStorage - usedCapacity}`
 
-      inventory[robotId] = currentAmount.add(amount.getAmount())
-    }
-
-    const removeFromInventory = ({ robotId, amount }: { robotId: string; amount: Quantity }) => {
-      const currentAmount = inventory[robotId]
-      if (!currentAmount) throw new InventoryEntryNotFoundError('Inventory not found for robotId: ' + robotId)
-      if (currentAmount.getAmount() < amount.getAmount()) throw new ExceedsCurrentInventoryError()
-      inventory[robotId] = currentAmount.reduce(amount.getAmount())
-    }
-
-    const getTotalAmount = () => {
-      let amount = 0
-      for (const [key, value] of Object.entries(inventory)) {
-        if (!value) throw new InvalidInventoryDataError(`Inventory data for ${key} is undefined`)
-        amount += value.getAmount()
+      if (!resource) throw new InventoryInvalidArgumentError(RESOURCE_UNDEFINED_ERROR)
+      if (!amountToAdd) throw new InventoryInvalidArgumentError(AMOUNT_TO_ADD_UNDEFINED_ERROR)
+      if (amountToAdd < 0) throw new InventoryInvalidArgumentError(AMOUNT_TO_ADD_NEGATIVE_ERROR)
+      if (amountToAdd > maxStorage - usedCapacity) {
+        amountToAdd = maxStorage - usedCapacity
+        logger.warn({ resource, amountToAdd, maxStorage, usedCapacity }, AMOUNT_TO_ADD_EXCEEDS_CAPACITY_WARNING)
       }
-      return amount
+
+      usedCapacity += amountToAdd
+      storage[resource] += amountToAdd
     }
 
-    const getTotalWorth = () => {
-      const totalAmount = getTotalAmount()
-      return totalAmount * resource.getSellingPrice()
-    }
+    const removeFromStorage = ({ resource, amoutToRemove }: { resource: ResourceType; amoutToRemove: number }) => {
+      const RESOURCE_UNDEFINED_ERROR = `resource is undefined`
+      const AMOUNT_TO_REMOVE_UNDEFINED_ERROR = `amoutToRemove is undefined`
+      const AMOUNT_TO_REMOVE_NEGATIVE_ERROR = `amoutToRemove is negative: ${amoutToRemove}`
+      const AMOUNT_TO_REMOVE_EXCEEDS_STORAGE_ERROR = `amoutToRemove: ${amoutToRemove} exceeds current storage: ${storage[resource]}`
 
-    const getInventoryForRobot = ({ robotId }: { robotId: string }) => {
-      const amount = inventory[robotId]
-      if (!amount) throw new InventoryEntryNotFoundError(`Inventory entry for robotId: ${robotId} not found`)
-      const inventoryDataEntry: InventoryDataEntry = {
-        robotId,
-        resource: resource,
-        amount,
-      }
-      return inventoryDataEntry
+      if (!resource) throw new InventoryInvalidArgumentError(RESOURCE_UNDEFINED_ERROR)
+      if (!amoutToRemove) throw new InventoryInvalidArgumentError(AMOUNT_TO_REMOVE_UNDEFINED_ERROR)
+      if (amoutToRemove < 0)
+        throw new InventoryInvalidArgumentError(`${AMOUNT_TO_REMOVE_NEGATIVE_ERROR}: ${amoutToRemove}`)
+      if (amoutToRemove > storage[resource])
+        throw new InventoryExceedsCurrentStorageError(
+          `${AMOUNT_TO_REMOVE_EXCEEDS_STORAGE_ERROR}: ${amoutToRemove} exceeds current storage: ${storage[resource]}`
+        )
+
+      usedCapacity -= amoutToRemove
+      storage[resource] -= amoutToRemove
     }
 
     return Object.freeze({
-      getRessource: () => resource,
-      getTotalAmount,
-      getInventory: () => inventory,
-      getInventoryForRobot,
-      addToInventory,
-      removeFromInventory,
-      getTotalWorth,
+      getId: () => id,
+      getStorageLevel: () => storageLevel,
+      getUsedStorage: () => usedCapacity,
+      getMaxStorage: () => maxStorage,
+      getFreeCapacity: () => maxStorage - usedCapacity,
+      isFull: () => usedCapacity == maxStorage,
+      getStorage: () => storage,
+      addToStorage,
+      removeFromStorage,
     })
   }
 }
