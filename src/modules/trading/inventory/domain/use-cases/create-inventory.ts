@@ -13,6 +13,6 @@ export default function makeCreateInventory({ inventoryDb }: CreateInventoryDepe
 
     if (exists) return exists
 
-    return await inventoryDb.insert({ inventoryData })
+    return await inventoryDb.insert(inventoryData)
   }
 }
