@@ -30,10 +30,8 @@ export default function makeAddToInventory({ inventoryDb }: AddToInventoryDepend
     inventory.addToStorage({ resource, amountToAdd: amount })
 
     const updated = await inventoryDb.update({
-      inventoryData: {
-        id: inventory.getId(),
-        storage: inventory.getStorage(),
-      },
+      id: inventory.getId(),
+      storage: inventory.getStorage(),
     })
 
     return { ...existing, ...updated }

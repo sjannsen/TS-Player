@@ -30,10 +30,8 @@ export default function makeRemoveFromInventory({ inventoryDb }: RemoveFromInven
     inventory.removeFromStorage({ resource, amoutToRemove: amount })
 
     const updated = await inventoryDb.update({
-      inventoryData: {
-        id: inventory.getId(),
-        storage: inventory.getStorage(),
-      },
+      id: inventory.getId(),
+      storage: inventory.getStorage(),
     })
 
     return { ...existing, ...updated }

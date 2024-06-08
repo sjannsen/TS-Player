@@ -47,9 +47,9 @@ export default function buildMakeInventory({ Id }: InventoryDependencies) {
     const STORAGE_AMOUNT_NEGATIVE_ERROR = `storageAmount is negative`
 
     if (!Id.isValidId(id)) throw new InventoryInvalidArgumentError(ID_INVALID_ERROR)
-    if (!storageLevel) throw new InventoryInvalidArgumentError(STORAGE_LEVEL_UNDEFINED_ERROR)
+    if (storageLevel == null) throw new InventoryInvalidArgumentError(STORAGE_LEVEL_UNDEFINED_ERROR)
     if (storageLevel < 0) throw new InventoryInvalidArgumentError(STORAGE_LEVEL_NEGATIVE_ERROR)
-    if (!maxStorage) throw new InventoryInvalidArgumentError(MAX_STORAGE_UNDEFINED_ERROR)
+    if (maxStorage == null) throw new InventoryInvalidArgumentError(MAX_STORAGE_UNDEFINED_ERROR)
     if (maxStorage < 0) throw new InventoryInvalidArgumentError(MAX_STORAGE_NEGATIVE_ERROR)
 
     let usedCapacity = 0
