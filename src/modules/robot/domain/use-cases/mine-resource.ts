@@ -54,10 +54,11 @@ export default function makeMineResource({
     if (!existing) throw new RobotNotFoundError(`Robot with id: ${robotServiceId} not found`)
 
     const robot = makeRobot(existing)
+
     const inventoryId = robot.getInventoryId()
     if (!inventoryId) throw new RobotError(`Inventory for robot: ${robot.getId()} is undefined`)
 
-    const planetResource = await getPlanetResource({ planetId: robot.getId() })
+    const planetResource = await getPlanetResource({ planetId: robot.getCurrentPlanet() })
     if (!planetResource)
       throw new RobotError(
         `Robot: ${robot.getId()} Cannot mine resource on planet: ${robot.getCurrentPlanet()} because planet has no resources`
@@ -72,9 +73,9 @@ export default function makeMineResource({
       throw new RobotError(
         `Robot: ${robot.getId()} Cannot mine resource on planet: ${robot.getCurrentPlanet()} of type: ${minedResource} because type on planet is: ${type}`
       )
-
     const { freeCapacity } = await getFreeInventoryCapacity({ inventoryId })
     let actualMinedAmount = minedAmount
+
     if (actualMinedAmount > freeCapacity) {
       actualMinedAmount = freeCapacity
       logger.warn(
@@ -82,6 +83,7 @@ export default function makeMineResource({
         'Mined amount exceeds inventory capacity. Only saving reduced amount'
       )
     }
+
     const freeCapacityLeft = freeCapacity - actualMinedAmount
 
     await addToInventory({ inventoryId, resource: minedResource, amount: minedAmount })

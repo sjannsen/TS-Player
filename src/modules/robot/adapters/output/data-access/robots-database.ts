@@ -65,14 +65,18 @@ export default function makeRobotsDatabase({ makeDb }: MakeRobotsDatabaseProps) 
     const currentGameId = getCurrentGameId()
     if (!currentGameId) throw new Error(`Cannot findAll robots. GameId is undefined: ${currentGameId}`)
 
-    const result = await db
-      .collection<RobotSchema>('robots')
-      .findOne({ _id: id, robotServiceId, gameId: currentGameId })
-    if (!result) return result
+    const queryCriteria: Partial<RobotSchema> = {}
+    if (id) queryCriteria._id = id
+    if (robotServiceId) queryCriteria.robotServiceId = robotServiceId
+
+    const result = await db.collection<RobotSchema>('robots').findOne(queryCriteria)
+
+    if (!result) {
+      return result
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _id, gameId, ...robotData } = result
-
     return { ...robotData }
   }
 
@@ -94,9 +98,11 @@ export default function makeRobotsDatabase({ makeDb }: MakeRobotsDatabaseProps) 
     const gameId = getCurrentGameId()
     if (!gameId) throw new Error(`Cannot findAll robots. GameId is undefined: ${gameId}`)
 
-    const result = await db
-      .collection<RobotSchema>('robots')
-      .updateOne({ _id: id, robotServiceId: robotServiceId }, { $set: { ...robotData } })
+    const queryCriteria: Partial<RobotSchema> = {}
+    if (id) queryCriteria._id = id
+    if (robotServiceId) queryCriteria.robotServiceId = robotServiceId
+
+    const result = await db.collection<RobotSchema>('robots').updateOne(queryCriteria, { $set: { ...robotData } })
 
     return result.modifiedCount === 1 ? { ...robotData } : null
   }
