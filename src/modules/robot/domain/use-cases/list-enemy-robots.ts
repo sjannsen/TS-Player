@@ -1,3 +1,4 @@
+import { RobotData } from '../models/robot'
 import { RobotDb } from './data-access'
 
 type ListEnemyRobotsDependencies = {
@@ -9,7 +10,8 @@ type ListEnemyRobotsProps = {
 }
 
 export default function makeListEnemyRobots({ robotDb }: ListEnemyRobotsDependencies) {
-  return function listEnemyRobots({ enemyPlayerIds }: ListEnemyRobotsProps) {
-    return robotDb.findAll({ playerIds: enemyPlayerIds })
+  return async function listEnemyRobots({ enemyPlayerIds }: ListEnemyRobotsProps): Promise<RobotData[]> {
+    const robots = await robotDb.findAll({ owner: 'Enemy' })
+    return robots.filter((robot) => enemyPlayerIds.includes(robot.player))
   }
 }

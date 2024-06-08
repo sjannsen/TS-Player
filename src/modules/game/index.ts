@@ -1,4 +1,4 @@
-import { getCurrentGameId } from './current-game'
+import { getCurrentGameId, setUpCurrentGameHandler } from './current-game'
 import { getCurrentRoundId, getCurrentRoundNumber, setUpRoundStatusStateHandler } from './roundStatus'
 
 const gameStatusService = Object.freeze({
@@ -9,7 +9,7 @@ const gameStatusService = Object.freeze({
 
 const setUpGameStateHandlers = () => {
   setUpRoundStatusStateHandler()
-  setUpGameStateHandlers()
+  setUpCurrentGameHandler()
 }
 
 export default gameStatusService
