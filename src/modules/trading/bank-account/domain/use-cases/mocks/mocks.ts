@@ -1,9 +1,11 @@
+import Id from '../../Id'
 import { BankAccount, Transaction } from '../../model/bankAccount'
 import { BankAccountDb } from '../types'
 
+const mockTransactionId = Id.makeId()
 const mockTransactionHistory: Transaction[] = [
-  { type: 'deposit', amount: 10, round: 0, time: new Date('May 21, 2024 03:24:00') },
-  { type: 'withdraw', amount: 10, round: 1, time: new Date('May 21, 2024 03:25:00') },
+  { type: 'deposit', amount: 10, round: 0, time: new Date('May 21, 2024 03:24:00'), id: mockTransactionId },
+  { type: 'withdraw', amount: 10, round: 1, time: new Date('May 21, 2024 03:25:00'), id: mockTransactionId },
 ]
 const mockGetTransactionHistory = jest.fn().mockReturnValue(mockTransactionHistory)
 const mockBankAccount: BankAccount = {

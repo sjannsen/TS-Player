@@ -18,7 +18,7 @@ describe('mineResource', () => {
 
     expect(planetDb.findById.mock.calls.length).toBe(1)
     expect(planetDb.findById.mock.calls[0][0]).toEqual({ mapServiceId: 'mapId' })
-    expect(planetDb.update.mock.calls.length).toBe(1)
+    expect(planetDb.updateResourceAmount.mock.calls.length).toBe(1)
     expect(updated.resource?.currentAmount).toBe(90)
   })
 
