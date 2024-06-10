@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx ts-node ./src/index.ts | npx pino-pretty",
-    "test": "jest"
+    "test": "jest",
+    "start": "node --es-module-specifier-resolution=node dist/src/index.js",
+    "compile": "tsc --removeComments true"
   },
   "keywords": [],
   "author": "",

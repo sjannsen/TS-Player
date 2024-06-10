@@ -1,6 +1,38 @@
 version: '3.8'
 
 services:
+  mongodb:
+    container_name: mongo-dev
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+      - MONGO_INITDB_DATABASE=auth
+    networks:
+      - mongo-compose-network
+    ports:
+      - '27018:27017'
+    volumes:
+      - ./data:/data/db
+
+  mongo-express:
+    container_name: mongo-express
+    image: mongo-express:latest
+    depends_on:
+      - mongodb
+    networks:
+      - mongo-compose-network
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo-dev
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=pass
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=tribes
+    ports:
+      - '8090:8081'
+    volumes:
+      - ./data:/data/db
+
   neo4j:
     image: neo4j:latest
     container_name: neo4j
@@ -9,3 +41,7 @@ services:
       - '7687:7687'
     environment:
       - NEO4J_AUTH=neo4j/letmein! # Benutzername/Passwort für die Authentifizierung
+
+networks:
+  mongo-compose-network:
+    driver: bridge

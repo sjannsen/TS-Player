@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-deployment
+  namespace: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: registry.gitlab.com/the-microservice-dungeon/{{ .Chart.Name }}:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+          limits:
+            memory: "1G"
+            cpu: "1000m"
+        env:
+        - name: GAME_URL
+          value: http://game-service.game:8080
+        - name: RABBITMQ_HOST
+          value: rabbitmq-service.rabbitmq
+        - name: LOGGING_LEVEL
+          value: info
+        volumeMounts:
+        - mountPath: /app/logs
+          name: logs-volume
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 8000
+        #     httpHeaders:
+        #     - name: Accept
+        #       value: application-json
+        #   initialDelaySeconds: 5
+        #   # Normally it would be way less. But we should avoid killing the player because we're losing state
+        #   failureThreshold: 10
+        #   periodSeconds: 6
+      volumes:
+      - name: logs-volume
+        emptyDir:
+          sizeLimit: 500Mi
