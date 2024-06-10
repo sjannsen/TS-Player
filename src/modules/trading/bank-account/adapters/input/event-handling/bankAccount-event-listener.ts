@@ -18,7 +18,7 @@ export default function setUpTradingEventListeners() {
     if (transactionAmount < 0) bankAccountService.withdrawMoney({ amount: Math.abs(transactionAmount) })
     else bankAccountService.depositMoney({ amount: transactionAmount })
 
-    const balance = bankAccountService.getBalance().getAmount()
+    const balance = bankAccountService.getBalance()
     logger.info({ balance: event.payload.balance, actualBalance: balance }, 'New balance should be')
   })
 

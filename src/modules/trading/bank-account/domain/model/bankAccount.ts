@@ -9,26 +9,24 @@ export type Transaction = {
 }
 
 export type BankAccount = {
-  getBalance: () => Money
+  getBalance: () => number
   getTransactionHistory: () => Array<Transaction>
   deposit: (amount: number) => void
   withdraw: (amount: number) => void
 }
 
 type makeBankAccountProps = {
-  initialBalance?: Money
+  initialBalance?: number
 }
 
 type makeBankAccountDependencies = {
-  makeMoney: ({ initialAmount }: { initialAmount: number }) => Money
   getRoundDuration: () => number | null
 }
 
-export default function buildMakeBankAccount({ makeMoney, getRoundDuration }: makeBankAccountDependencies) {
-  return function makeBankAccount({ initialBalance }: makeBankAccountProps): BankAccount {
-    if (!initialBalance) initialBalance = makeMoney({ initialAmount: 0 })
-    if (initialBalance.getAmount() < 0)
-      throw new NegativeBankAccountInitializationError('Initial balance must not be negative')
+export default function buildMakeBankAccount({ getRoundDuration }: makeBankAccountDependencies) {
+  return function makeBankAccount({ initialBalance = 0 }: makeBankAccountProps): BankAccount {
+    if (initialBalance < 0)
+      throw new NegativeBankAccountInitializationError(`InitialBalance is negative: ${initialBalance}`)
 
     let balance = initialBalance
     const transactionHistory: Array<Transaction> = []
@@ -39,12 +37,12 @@ export default function buildMakeBankAccount({ makeMoney, getRoundDuration }: ma
     }
 
     const deposit = (amount: number) => {
-      balance = balance.add(amount)
+      balance = balance += amount
       makeTransaction({ type: 'deposit', amount })
     }
 
     const withdraw = (amount: number) => {
-      balance = balance.subtract(amount)
+      balance = balance -= amount
       makeTransaction({ type: 'withdraw', amount })
     }
 
