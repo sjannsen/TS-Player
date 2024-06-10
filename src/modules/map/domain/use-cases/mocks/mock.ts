@@ -3,7 +3,7 @@ import Id from '../../Id'
 import { PlanetData, PlanetResource } from '../../model/planet'
 
 const mockPlanetResource: PlanetResource = {
-  type: 'COAL',
+  resourceType: 'COAL',
   currentAmount: 100,
   maxAmount: 100,
 }

@@ -6,7 +6,7 @@ import {
 } from './planet.erros'
 
 export type PlanetResource = {
-  type: ResourceType
+  resourceType: ResourceType
   maxAmount: number
   currentAmount: number
 }

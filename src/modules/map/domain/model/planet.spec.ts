@@ -3,7 +3,7 @@ import { NeighborPlanets, Planet, PlanetResource } from './planet'
 import { PlanetExceedsCurrentResourceError, PlanetInvalidArgumentError } from './planet.erros'
 
 describe('makePlanet', () => {
-  const resource: PlanetResource = { type: 'COAL', currentAmount: 100, maxAmount: 100 }
+  const resource: PlanetResource = { resourceType: 'COAL', currentAmount: 100, maxAmount: 100 }
 
   it('creates a planet', () => {
     const planet = makePlanet({ mapServiceId: 'mapId', x: 0, y: 0, movementDifficulty: 1, resource })
@@ -131,7 +131,7 @@ describe('mineResource', () => {
   let planet: Planet
 
   beforeEach(() => {
-    resource = { type: 'COAL', currentAmount: 100, maxAmount: 100 }
+    resource = { resourceType: 'COAL', currentAmount: 100, maxAmount: 100 }
     planet = makePlanet({ mapServiceId: 'mapId', x: 0, y: 0, movementDifficulty: 1, resource })
   })
 
