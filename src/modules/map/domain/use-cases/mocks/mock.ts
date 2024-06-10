@@ -25,6 +25,10 @@ export type MockPlanetDb = {
   findAll: jest.Mock
   insert: jest.Mock
   update: jest.Mock
+  addResource: jest.Mock
+  addCoordinates: jest.Mock
+  updateResourceAmount: jest.Mock
+  updateNeighbors: jest.Mock
 }
 
 const mockPlanetDb: MockPlanetDb = {
@@ -38,6 +42,10 @@ const mockPlanetDb: MockPlanetDb = {
   update: jest.fn().mockReturnValue(mockPlanet),
   findAll: jest.fn().mockReturnValue([mockPlanet]),
   insert: jest.fn().mockReturnValue(mockPlanet),
+  addResource: jest.fn(),
+  addCoordinates: jest.fn(),
+  updateResourceAmount: jest.fn(),
+  updateNeighbors: jest.fn(),
 }
 
 const clearMockPlanetDb = () => {
