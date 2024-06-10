@@ -1,6 +1,4 @@
-import makeMoney from '../../../../../shared/money/money'
-import { Money } from '../../../../../shared/money/money.types'
-import { Transaction, BankAccount } from '../../model/bankAccount'
+import { BankAccount, Transaction } from '../../model/bankAccount'
 import { BankAccountDb } from '../types'
 
 const mockTransactionHistory: Transaction[] = [
@@ -10,7 +8,7 @@ const mockTransactionHistory: Transaction[] = [
 const mockGetTransactionHistory = jest.fn().mockReturnValue(mockTransactionHistory)
 const mockBankAccount: BankAccount = {
   getTransactionHistory: mockGetTransactionHistory,
-  getBalance: jest.fn().mockReturnValue(makeMoney({ initialAmount: 0 })),
+  getBalance: jest.fn().mockReturnValue(0),
   deposit: jest.fn(),
   withdraw: jest.fn(),
 }
@@ -22,18 +20,4 @@ const mockBankAccountDb: BankAccountDb = {
   update: jest.fn(),
 }
 
-const mockMoney: Money = {
-  add: jest.fn(),
-  subtract: jest.fn(),
-  getAmount: jest.fn().mockReturnValue(0),
-}
-const mockMakeMoney = jest.fn().mockReturnValue(mockMoney)
-
-export {
-  mockTransactionHistory,
-  mockGetTransactionHistory,
-  mockBankAccount,
-  mockGetBankAccount,
-  mockBankAccountDb,
-  mockMakeMoney,
-}
+export { mockBankAccount, mockBankAccountDb, mockGetBankAccount, mockGetTransactionHistory, mockTransactionHistory }
