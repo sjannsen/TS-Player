@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 import { clearSetUp, setUpGame, startGame } from './development-setup'
 import setUpRabbitMQ from './event-handling/event-consumer'
 import setUpEventListeners from './event-handling/setup-event-listener'
+import { connectToNeo4j } from './modules/map/adapters/output/data-access/neo4j-connection'
 import { joinNextGameAvailable, setUpPlayer } from './setup'
 import { setUpStateHandlers } from './setup/setUpStateHandlers'
 import { updatePlayerConfig } from './shared/config'
@@ -36,6 +37,8 @@ process.on('exit', (code) => {
 const devMode = process.env.ENVIROMENT == 'dev'
 
 async function main() {
+  connectToNeo4j()
+
   if (devMode) {
     logger.info('Starting in Dev Mode')
     await clearSetUp()
