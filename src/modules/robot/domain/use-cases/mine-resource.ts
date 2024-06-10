@@ -64,7 +64,7 @@ export default function makeMineResource({
         `Robot: ${robot.getId()} Cannot mine resource on planet: ${robot.getCurrentPlanet()} because planet has no resources`
       )
 
-    const { type, currentAmount } = planetResource
+    const { resourceType: type, currentAmount } = planetResource
     if (currentAmount == 0)
       throw new RobotError(
         `Robot: ${robot.getId()} Cannot mine resource on planet: ${robot.getCurrentPlanet()} because current amount is 0`

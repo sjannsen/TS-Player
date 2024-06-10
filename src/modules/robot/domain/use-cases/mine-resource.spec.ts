@@ -7,7 +7,7 @@ import { clearMockRobotDb, mockRobotDb } from './mocks/mock'
 describe('mineResource', () => {
   const getPlanetResourceMock = jest
     .fn()
-    .mockReturnValue({ type: 'COAL', currentAmount: 10, maxAmount: 10 } as PlanetResource)
+    .mockReturnValue({ resourceType: 'COAL', currentAmount: 10, maxAmount: 10 } as PlanetResource)
   const getFreeInventoryCapacityMock = jest.fn().mockReturnValue({ freeCapacity: 5 })
   const addToInventoryMock = jest.fn()
   const minePlanetResouceMock = jest.fn()

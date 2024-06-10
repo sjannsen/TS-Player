@@ -8,7 +8,7 @@ export type MinedResource = {
 }
 
 export type Resource = {
-  type: ResourceType
+  resourceType: ResourceType
   maxAmount: number
   currentAmount: number
 }
