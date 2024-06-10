@@ -1,0 +1,59 @@
+include:
+  - project: "the-microservice-dungeon/devops-team/common-ci-cd"
+    ref: "main"
+    file: "helm/package-publish.yaml"
+
+stages:
+  - lint
+  - test
+  - build
+  - helm
+
+variables:
+  PATH_TO_CHART: "helm-chart"
+  CHART_NAME: "player-skeleton-typescript-nodejs" # ! TODO: Update to your player name
+
+
+lint:
+  stage: lint
+  image: node:latest
+  cache:
+    paths:
+      - node_modules/
+  before_script:
+    - npm ci
+  script:
+    - npm run lint
+  allow_failure: true
+
+test:
+  stage: test
+  image: node:latest
+  cache:
+    paths:
+      - node_modules/
+  before_script:
+    - npm ci
+  script:
+    - npm run test
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  script:
+    - tag=latest
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:${tag}" .
+    - docker push "$CI_REGISTRY_IMAGE:${tag}"
+
+helm-package-publish:
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      changes:
+        - ${PATH_TO_CHART}/**/*
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: always
+
