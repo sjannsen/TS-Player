@@ -21,11 +21,9 @@ export default function makeMineResource({ planetDb }: MineResourceDependencies)
     const planet = makePlanet({ ...existing })
     planet.mineResource(amount)
 
-    const updated = await planetDb.update({
-      planetData: {
-        id: planet.getId(),
-        resource: planet.getResource(),
-      },
+    const updated = await planetDb.updateResourceAmount({
+      id: planet.getId(),
+      resource: planet.getResource(),
     })
 
     return { ...existing, ...updated }
