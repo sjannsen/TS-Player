@@ -1,22 +1,24 @@
-type BankAccountClearedEvent = {
+import { TradablePrice, TradableType } from './trading.types'
+
+export type BankAccountClearedEvent = {
   playerId: string
   balance: number
 }
 
-type BankAccountInitializedEvent = {
+export type BankAccountInitializedEvent = {
   playerId: string
   balance: number
 }
 
-type BankAccountTransactionBookedEvent = {
+export type BankAccountTransactionBookedEvent = {
   playerId: string
   transactionAmount: number
   balance: number
 }
 
-type TradablePricesEvent = Array<TradablePrice>
+export type TradablePricesEvent = Array<TradablePrice>
 
-type TradableSoldEvent = {
+export type TradableSoldEvent = {
   playerId: string
   robotId: string
   type: TradableType
@@ -26,7 +28,7 @@ type TradableSoldEvent = {
   totalPrice: number
 }
 
-type TradableBoughtEvent = {
+export type TradableBoughtEvent = {
   playerId: string
   robotId: string
   type: TradableType
