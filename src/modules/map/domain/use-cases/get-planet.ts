@@ -16,8 +16,12 @@ export default function makeGetPlanet({ planetDb }: GetPlanetDependencies) {
     if (!queryParams || Object.keys(queryParams).length === 0)
       throw new PlanetInvalidArgumentError(`Query params are undefined: ${queryParams}`)
 
-    const planet = await planetDb.findById(queryParams)
+    const { id, mapServiceId } = queryParams
+    let planet = null
+    if (id) planet = await planetDb.findById({ id })
+    else if (mapServiceId) planet = await planetDb.findByMapServiceId({ mapServiceId })
 
+    if (!id && !mapServiceId) throw new Error('No QuerryParams for getPlanet?!')
     return planet
   }
 }

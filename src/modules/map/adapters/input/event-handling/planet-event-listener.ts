@@ -5,7 +5,7 @@ import { NeighborPlanets } from '../../../domain/model/planet'
 import planetService from '../../../domain/use-cases'
 
 export default function setUpPlanetEventListeners() {
-  eventBus.subscribe('PlanetDiscovered', ({ event }) => {
+  eventBus.subscribe('PlanetDiscovered', async ({ event }) => {
     const { planet, movementDifficulty, resource, neighbours } = event.payload
 
     const neighborPlanets: NeighborPlanets = {
@@ -19,7 +19,18 @@ export default function setUpPlanetEventListeners() {
     })
 
     try {
-      planetService.createPlanet({ mapServiceId: planet, movementDifficulty, resource, neighborPlanets })
+      const existing = await planetService.getPlanet({ mapServiceId: planet })
+      logger.info({ existing }, 'Existing planet')
+      if (!existing)
+        await planetService.createPlanet({ mapServiceId: planet, movementDifficulty, resource, neighborPlanets })
+      else
+        await planetService.updatePlanet({
+          id: existing.id,
+          mapServiceId: planet,
+          movementDifficulty,
+          resource,
+          neighborPlanets,
+        })
     } catch (error) {
       logger.error(error, 'Error while processing PlanetDiscovered event')
       process.exit(5)

@@ -1,12 +1,18 @@
-import { ResourceType } from '../../../../shared/types'
 import { PlanetData } from '../model/planet'
 
 export type PlanetDb = {
   insert: (planetData: Omit<PlanetData, 'x' | 'y'>) => Promise<Partial<PlanetData> | null>
-  findById: (queryParams: { id?: string; mapServiceId?: string; resource?: ResourceType }) => Promise<PlanetData | null>
+  findById: ({ id }: { id: string }) => Promise<PlanetData | null>
   findAll: () => Promise<PlanetData[]>
-  addResource: ({ id, resource }: Partial<PlanetData>) => Promise<Partial<PlanetData>>
-  addCoordinates: ({ id, x, y }: Partial<PlanetData>) => Promise<Partial<PlanetData> | null>
-  updateResourceAmount: ({ id, resource }: Partial<PlanetData>) => Promise<Partial<PlanetData> | null>
-  updateNeighbors: ({ id, neighborPlanets }: Partial<PlanetData>) => Promise<Partial<PlanetData> | null>
+  // findShortestPath: ({ currentId, targetId }: { currentId: string; targetId: string }) => Promise<unknown | null>
+  findByMapServiceId: ({ mapServiceId }: { mapServiceId: string }) => Promise<PlanetData | null>
+  update: ({
+    id,
+    mapServiceId,
+    movementDifficulty,
+    resource,
+    x,
+    y,
+    neighborPlanets,
+  }: Partial<PlanetData> & { id: string }) => Promise<PlanetData | null>
 }

@@ -11,7 +11,7 @@ type GetPlanetResourceProps = {
 
 export default function makeGetPlanetResource({ planetDb }: GetPlanetResourceDependencies) {
   return async function getPlanetResources({ planetId }: GetPlanetResourceProps): Promise<PlanetResource | undefined> {
-    const planet = await planetDb.findById({ mapServiceId: planetId })
+    const planet = await planetDb.findByMapServiceId({ mapServiceId: planetId })
 
     if (!planet || !planet.resource) return undefined
 

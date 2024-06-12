@@ -17,6 +17,14 @@ import {
   RobotUpgradedEvent,
   RobotsRevealedEvent,
 } from './robot/robot.events'
+import {
+  BankAccountClearedEvent,
+  BankAccountInitializedEvent,
+  BankAccountTransactionBookedEvent,
+  TradablePricesEvent,
+  TradableSoldEvent,
+  TradableBoughtEvent,
+} from './trading/trading.events'
 
 export type ErrorEvent = {
   playerId: string
