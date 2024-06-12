@@ -1,4 +1,6 @@
-import makePlanet from '../model'
+import { Direction } from '../../../../shared/types'
+import logger from '../../../../utils/logger'
+import makePlanet, { Id } from '../model'
 import { NeighborPlanets, PlanetResource } from '../model/planet'
 import { PlanetDb } from './data-access'
 
@@ -12,13 +14,12 @@ type CreatePlanetProps = {
   x?: number
   y?: number
   movementDifficulty: number
-  resource: PlanetResource
-  neighborPlanets?: NeighborPlanets
+  resource?: PlanetResource | null | undefined
+  neighborPlanets: NeighborPlanets
 }
 
 export default function makeCreatePlanet({ planetDb }: CreatePlanetDependencies) {
   return async function createPlanet({
-    id,
     mapServiceId,
     x,
     y,
@@ -26,13 +27,13 @@ export default function makeCreatePlanet({ planetDb }: CreatePlanetDependencies)
     resource,
     neighborPlanets,
   }: CreatePlanetProps) {
-    const exist = await planetDb.findById({ mapServiceId })
-    if (exist && exist.id) {
-      await planetDb.updateNeighbors({ id: exist.id, neighborPlanets })
-      return exist
-    }
+    logger.info({ mapServiceId }, 'Create planet')
 
-    const planet = makePlanet({ id, mapServiceId, x, y, movementDifficulty, resource, neighborPlanets })
+    const exist = await planetDb.findByMapServiceId({ mapServiceId })
+    if (exist) return exist
+
+    logger.info({ mapServiceId }, 'Planet does not exist')
+    const planet = makePlanet({ mapServiceId, x, y, movementDifficulty, resource, neighborPlanets })
     const created = await planetDb.insert({
       id: planet.getId(),
       mapServiceId: planet.getMapServiceId(),
@@ -41,6 +42,6 @@ export default function makeCreatePlanet({ planetDb }: CreatePlanetDependencies)
       neighborPlanets: planet.getNeighborPlanets(),
     })
 
-    return { ...created }
+    return created
   }
 }

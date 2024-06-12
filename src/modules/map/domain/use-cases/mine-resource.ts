@@ -14,14 +14,14 @@ type MineResourceProps = {
 const mineResourceErrorMessage = 'Error while mining resource of planet'
 export default function makeMineResource({ planetDb }: MineResourceDependencies) {
   return async function mineResource({ mapServiceId, amount }: MineResourceProps) {
-    const existing = await planetDb.findById({ mapServiceId })
+    const existing = await planetDb.findByMapServiceId({ mapServiceId })
     const planetNotExistingError = `${mineResourceErrorMessage}: Planet with Id: ${mapServiceId} does not exist`
     if (!existing) throw new PlanetNotFoundError(planetNotExistingError)
 
     const planet = makePlanet({ ...existing })
     planet.mineResource(amount)
 
-    const updated = await planetDb.updateResourceAmount({
+    const updated = await planetDb.update({
       id: planet.getId(),
       resource: planet.getResource(),
     })

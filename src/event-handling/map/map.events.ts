@@ -21,5 +21,5 @@ export type PlanetDiscoveredEvent = {
   planet: string
   movementDifficulty: number
   neighbours: Array<Neighbour>
-  resource: Resource
+  resource: Resource | null | undefined
 }

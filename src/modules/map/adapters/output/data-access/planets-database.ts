@@ -3,7 +3,7 @@ import { Direction } from '../../../../../shared/types'
 import logger from '../../../../../utils/logger'
 import { getCurrentGameId } from '../../../../game'
 import Id from '../../../domain/Id'
-import { PlanetData } from '../../../domain/model/planet'
+import { NeighborPlanets, PlanetData } from '../../../domain/model/planet'
 
 function getOppositeDirection(direction: Direction) {
   switch (direction) {
@@ -28,7 +28,12 @@ export default function makePlanetsDatabase(driver: Driver) {
     addResource,
     addCoordinates,
     updateResourceAmount,
-    updateNeighbors,
+    findShortestPath,
+    updatePlanet,
+    addRelationship,
+    existPlanetWithMapServiceId,
+    findPlanetByMapServiceId,
+    findExistingRelations,
   })
 
   async function findAll(): Promise<PlanetData[]> {
@@ -43,33 +48,30 @@ export default function makePlanetsDatabase(driver: Driver) {
     try {
       const { records } = await session.run(
         `
-      MATCH (p:Planet {gameId: $gameId})-[c:CONNECTED_TO]->(n) 
+      MATCH (p:Planet {mapServiceId: $mapServiceId, gameId: $gameId})
+      OPTIONAL MATCH (p)-[r_north: NORTH]->(north)
+      OPTIONAL MATCH (p)-[r_east: EAST]->(east)
+      OPTIONAL MATCH (p)-[r_south: SOUTH]->(south)
+      OPTIONAL MATCH (p)-[r_west: WEST]->(west)
       OPTIONAL MATCH (p)-[h:HAS_RESOURCE]->(r)
-      WITH p, collect({direction: c.direction, mapServiceId: n.mapServiceId}) AS directions, h, r
-      WITH p, 
-          [d IN directions WHERE d.direction = 'NORTH' | d.mapServiceId] AS north,
-          [d IN directions WHERE d.direction = 'EAST' | d.mapServiceId] AS east,
-          [d IN directions WHERE d.direction = 'SOUTH' | d.mapServiceId] AS south,
-          [d IN directions WHERE d.direction = 'WEST' | d.mapServiceId] AS west,
-          h, r
-      RETURN
-        {
+      RETURN 
+       {
           id: p.id,
           mapServiceId: p.mapServiceId,
           x: p.x,
           y: p.y,
           neighborPlanets: {
-            NORTH: north[0],
-            EAST: east[0],
-            SOUTH: south[0],
-            WEST: west[0]
+            NORTH: north.mapServiceId,
+            EAST: east.mapServiceId,
+            SOUTH: south.mapServiceId,
+            WEST: west.mapServiceId
           },
           resource: {
             resourceType: r.type, 
             currentAmount: h.currentAmount,
             maxAmount: h.maxAmount
           }
-        } AS planet`,
+      } as planet`,
         { gameId }
       )
 
@@ -84,7 +86,7 @@ export default function makePlanetsDatabase(driver: Driver) {
     }
   }
 
-  async function findById({ id, mapServiceId }: { id?: string; mapServiceId?: string }): Promise<PlanetData | null> {
+  async function findPlanetByMapServiceId({ mapServiceId }: { mapServiceId: string }): Promise<PlanetData | null> {
     const session = driver.session()
     const gameId = getCurrentGameId()
 
@@ -94,16 +96,12 @@ export default function makePlanetsDatabase(driver: Driver) {
     }
 
     const cypherQuery = `
-      MATCH (p:Planet)-[c:CONNECTED_TO]->(n) 
-      WHERE p.gameId = $gameId AND (p.id = $id OR p.mapServiceId = $mapServiceId)
-      OPTIONAL MATCH (p)-[h:HAS_RESOURCE]->(r)
-      WITH p, collect({direction: c.direction, mapServiceId: n.mapServiceId}) AS directions, h, r
-      WITH p, 
-          [d IN directions WHERE d.direction = 'NORTH' | d.mapServiceId] AS north,
-          [d IN directions WHERE d.direction = 'EAST' | d.mapServiceId] AS east,
-          [d IN directions WHERE d.direction = 'SOUTH' | d.mapServiceId] AS south,
-          [d IN directions WHERE d.direction = 'WEST' | d.mapServiceId] AS west,
-          h, r
+    MATCH (p:Planet {mapServiceId: $mapServiceId, gameId: $gameId})
+    OPTIONAL MATCH (p)-[r_north: NORTH]->(north)
+    OPTIONAL MATCH (p)-[r_east: EAST]->(east)
+    OPTIONAL MATCH (p)-[r_south: SOUTH]->(south)
+    OPTIONAL MATCH (p)-[r_west: WEST]->(west)
+    OPTIONAL MATCH (p)-[h:HAS_RESOURCE]->(r)
       RETURN 
        {
           id: p.id,
@@ -111,42 +109,33 @@ export default function makePlanetsDatabase(driver: Driver) {
           x: p.x,
           y: p.y,
           neighborPlanets: {
-            NORTH: north[0],
-            EAST: east[0],
-            SOUTH: south[0],
-            WEST: west[0]
+            NORTH: north.mapServiceId,
+            EAST: east.mapServiceId,
+            SOUTH: south.mapServiceId,
+            WEST: west.mapServiceId
           },
           resource: {
             resourceType: r.type, 
             currentAmount: h.currentAmount,
             maxAmount: h.maxAmount
           }
-        } AS planet`
 
+    } as planet
+    `
+    logger.info({ mapServiceId }, 'FindPlanetByMapId')
     try {
-      const { records } = await session.run(cypherQuery, {
-        id: id ?? null,
-        mapServiceId: mapServiceId ?? null,
-        gameId,
-      })
-
-      const result = records.map((record) => record.get('planet'))
-      return result[0] ?? null
+      const { records } = await session.run(cypherQuery, { mapServiceId, gameId })
+      if (records.length == 0) return null
+      const result = records[0].has('planet') ? records[0].get('planet') : null
+      logger.info({ result }, `Result of query for ${mapServiceId}`)
+      return result
     } catch (error) {
-      logger.error({ error, id, mapServiceId }, 'Error while query a planet by id from database')
+      logger.error({ mapServiceId }, 'Error while finding Planet by mapId')
       throw error
-    } finally {
-      await session.close()
     }
   }
 
-  async function insert({
-    id = Id.makeId(),
-    mapServiceId,
-    movementDifficulty,
-    neighborPlanets,
-    resource,
-  }: Omit<PlanetData, 'x' | 'y'>): Promise<Partial<PlanetData | null>> {
+  async function existPlanetWithMapServiceId({ mapServiceId }: { mapServiceId: string }) {
     const session = driver.session()
     const gameId = getCurrentGameId()
 
@@ -155,65 +144,112 @@ export default function makePlanetsDatabase(driver: Driver) {
       throw new Error('GameId not found')
     }
 
-    let cypherQuery = `
-    MERGE (p:Planet {id: $id, mapServiceId: $mapServiceId})
-    ON CREATE SET p.movementDifficulty = $movementDifficulty, p.gameId = $gameId
-    `
-    let cypherQueryReturnPart =
-      'RETURN { id: p.id, mapServiceId: p.mapServiceId, movementDifficulty: p.movementDifficulty} AS planet'
-    let cypherQueryParams: {
-      id: string
-      mapServiceId: string
-      movementDifficulty: number
-      resourceType?: string
-      currentAmount?: number
-      maxAmount?: number
-      gameId: string
-    } = {
-      id,
-      mapServiceId,
-      movementDifficulty,
-      gameId,
+    try {
+      const { records } = await session.run(
+        `MATCH (p:Planet {mapServiceId: $mapServiceId, gameId: $gameId}) RETURN p`,
+        { mapServiceId, gameId }
+      )
+      logger.info({ records }, 'Records')
+      if (records.length > 0) return true
+      return false
+    } catch (error) {
+      logger.error({ mapServiceId }, 'Error while check existing')
+      throw error
     }
+  }
+
+  async function findById({ id }: { id?: string }): Promise<PlanetData | null> {
+    const session = driver.session()
+    const gameId = getCurrentGameId()
+
+    if (!gameId) {
+      logger.error('Cannot insert planet in db bevause currentGameId is undefined')
+      throw new Error('GameId not found')
+    }
+    logger.warn({ id }, 'find by id')
+    const cypherQuery = `
+    MATCH (p:Planet {id: $id, gameId: $gameId})
+    OPTIONAL MATCH (p)-[r_north: NORTH]->(north)
+    OPTIONAL MATCH (p)-[r_east: EAST]->(east)
+    OPTIONAL MATCH (p)-[r_south: SOUTH]->(south)
+    OPTIONAL MATCH (p)-[r_west: WEST]->(west)
+    OPTIONAL MATCH (p)-[h:HAS_RESOURCE]->(r)
+      RETURN 
+       {
+          id: p.id,
+          mapServiceId: p.mapServiceId,
+          x: p.x,
+          y: p.y,
+          neighborPlanets: {
+            NORTH: p.r_north,
+            EAST: p.r_east,
+            SOUTH: p.r_south,
+            WEST: p.r_west
+          },
+          resource: {
+            resourceType: r.type, 
+            currentAmount: h.currentAmount,
+            maxAmount: h.maxAmount
+          }
+
+
+    } as planet`
 
     try {
-      for (const [direction, mapServiceId] of Object.entries(neighborPlanets!)) {
-        if (!mapServiceId) continue
-        const directionShort = direction[0].toLowerCase()
-        const oppositeDirection = getOppositeDirection(direction as Direction)
-        const addition = `
-        MERGE (p)-[:CONNECTED_TO {direction: '${direction}'}]->(${directionShort}:Planet {mapServiceId: '${mapServiceId}'})
-        MERGE (${directionShort})-[:CONNECTED_TO {direction: '${oppositeDirection}'}]->(p)`
-        cypherQuery += addition
-        cypherQueryReturnPart += `, {${direction}: ${directionShort}.mapServiceId} AS ${direction}`
-      }
+      const { records } = await session.run(cypherQuery, {
+        id: id ?? null,
+        gameId,
+      })
 
-      if (resource) {
-        const addition = `
-        MERGE (r:Resource {type: $resourceType})
-        MERGE (p)-[h:HAS_RESOURCE {currentAmount: $currentAmount, maxAmount: $maxAmount}]->(r)
-        `
-        cypherQueryReturnPart += ', { type: r.type, currentAmount: h.currentAmount, maxAmount: h.maxAmount} AS resource'
-        cypherQuery += addition
-        const { resourceType, currentAmount, maxAmount } = resource
-        cypherQueryParams = { ...cypherQueryParams, resourceType: resourceType, maxAmount, currentAmount }
-      }
+      const result = records.map((record) => record.get('planet'))
+      logger.info({ result: result[0] }, 'Query result')
+      console.log(result[0] ?? null)
+      console.log(result[0])
+      console.log(null)
 
-      cypherQuery += cypherQueryReturnPart
-      const { records } = await session.run(cypherQuery, cypherQueryParams)
+      return result[0] ?? null
+    } catch (error) {
+      logger.error({ error, id }, 'Error while query a planet by id from database')
+      throw error
+    } finally {
+      await session.close()
+    }
+  }
+
+  async function insert({
+    id,
+    mapServiceId,
+    movementDifficulty,
+    neighborPlanets,
+    resource,
+  }: Omit<PlanetData, 'x' | 'y'>): Promise<Partial<PlanetData | null>> {
+    logger.info({ id, mapServiceId }, 'Insert')
+    const session = driver.session()
+    const gameId = getCurrentGameId()
+
+    if (!gameId) {
+      logger.error('Cannot insert planet in db bevause currentGameId is undefined')
+      throw new Error('GameId not found')
+    }
+
+    const cypherQuery = `
+    MERGE (p:Planet {id: $id})
+    ON CREATE SET p.mapServiceId = $mapServiceId, p.gameId = $gameId
+    RETURN {
+      id: p.id,
+      mapServiceId: p.mapServiceId, 
+      gameId: p.gameId
+    } AS planet
+    `
+    try {
+      const { records } = await session.run(cypherQuery, { id, mapServiceId, gameId })
 
       const result = records.map((record) => {
-        return {
-          ...record.get('planet'),
-          neighborPlanets: {
-            NORTH: record.has('NORTH') ? record.get('NORTH')?.NORTH ?? null : null,
-            EAST: record.has('EAST') ? record.get('EAST')?.EAST ?? null : null,
-            SOUTH: record.has('SOUTH') ? record.get('SOUTH')?.SOUTH ?? null : null,
-            WEST: record.has('WEST') ? record.get('WEST')?.WEST ?? null : null,
-          },
-          resource: record.has('resource') ? record.get('resource') : null,
-        }
+        return record.has('planet') ? record.get('planet') : null
       })
+
+      logger.info({ result }, 'Inserted planet')
+
       return result[0]
     } catch (error) {
       logger.error(
@@ -225,8 +261,6 @@ export default function makePlanetsDatabase(driver: Driver) {
           neighborPlanets,
           resource,
           cypherQuery,
-          cypherQueryReturnPart,
-          cypherQueryParams,
         },
         'Error while inserting a planets in database'
       )
@@ -236,7 +270,8 @@ export default function makePlanetsDatabase(driver: Driver) {
     }
   }
 
-  async function updateNeighbors({ id, neighborPlanets }: Partial<PlanetData>): Promise<Partial<PlanetData> | null> {
+  async function findExistingRelations({ id }: { id: string }): Promise<NeighborPlanets | null> {
+    logger.info('find existing relations')
     const session = driver.session()
     const gameId = getCurrentGameId()
 
@@ -245,43 +280,29 @@ export default function makePlanetsDatabase(driver: Driver) {
       throw new Error('GameId not found')
     }
 
-    let cypherQuery = `
+    const cypherQuery = `
     MATCH (p:Planet {id: $id, gameId: $gameId})
+    OPTIONAL MATCH (p)-[north:NORTH]-(n)
+    OPTIONAL MATCH (p)-[east:EAST]-(e)
+    OPTIONAL MATCH (p)-[south:SOUTH]-(s)
+    OPTIONAL MATCH (p)-[west:WEST]-(w)
+    RETURN {
+    north: n.mapId,
+    east: e.mapId,
+    south: s.mapId,
+    west: w.mapId
+    } as neighborPlanets
     `
-    let cypherQueryReturnPart = 'RETURN { id: p.id, mapServiceId: p.mapServiceId } AS planet'
-    try {
-      for (const [direction, mapServiceId] of Object.entries(neighborPlanets!)) {
-        if (!mapServiceId) continue
-        const directionShort = direction[0].toLowerCase()
-        const oppositeDirection = getOppositeDirection(direction as Direction)
-        const addition = `
-        MERGE (p)-[:CONNECTED_TO {direction: '${direction}'}]->(${directionShort}:Planet {mapServiceId: '${mapServiceId}'})
-        MERGE (${directionShort})-[:CONNECTED_TO {direction: '${oppositeDirection}'}]->(p)`
-        cypherQuery += addition
-        cypherQueryReturnPart += `, {${direction}: ${directionShort}.mapServiceId} AS ${direction}`
-      }
 
-      cypherQuery += cypherQueryReturnPart
+    try {
       const { records } = await session.run(cypherQuery, { id, gameId })
 
-      const result = records.map((record) => {
-        return {
-          ...record.get('planet'),
-          neighborPlanets: {
-            NORTH: record.has('NORTH') ? record.get('NORTH').NORTH : null,
-            EAST: record.has('EAST') ? record.get('EAST').EAST : null,
-            SOUTH: record.has('SOUTH') ? record.get('SOUTH').SOUTH : null,
-            WEST: record.has('WEST') ? record.get('WEST').WEST : null,
-          },
-          resource: record.has('resource') ? record.get('resource') : null,
-        }
-      })
-      return result[0] ?? null
+      const results = records.map((record) => (record.has('neighborPlanets') ? record.get('neighborPlanets') : null))
+      logger.info({ results })
+      return results[0]
     } catch (error) {
-      logger.error({ error, id, neighborPlanets }, 'Error while updating neighbor of planet')
+      logger.error({ id }, 'Error while findExistingRelationships')
       throw error
-    } finally {
-      await session.close()
     }
   }
 
@@ -396,6 +417,142 @@ export default function makePlanetsDatabase(driver: Driver) {
       throw error
     } finally {
       await session.close()
+    }
+  }
+
+  interface PlanetRecord {
+    id: string
+  }
+
+  interface Relationship {
+    type: string
+  }
+
+  interface PathSegment {
+    start: PlanetRecord
+    relationship: Relationship
+    end: PlanetRecord
+  }
+
+  interface Path {
+    segments: PathSegment[]
+  }
+
+  async function findShortestPath({
+    currentId,
+    targetId,
+  }: {
+    currentId: string
+    targetId: string
+  }): Promise<unknown | null> {
+    const session = driver.session()
+    const cypherQuery = `
+    MATCH (current:Planet { id: $currentId})
+    MATCH (target:Planet {id: $targetId})
+    MATCH path = shortestPath((current)-[*..20]-(target))
+    RETURN path
+    `
+    try {
+      const { records } = await session.run(cypherQuery, { currentId, targetId })
+
+      if (records.length === 0) {
+        logger.warn({ currentId, targetId }, 'No shortest path found between')
+        return null
+      }
+
+      const result = records.forEach((record) => {
+        return { record: record.has('path') ? record.get('path') : null }
+      })
+      logger.error({ result }, 'SHORTEST PATH')
+      logger.error({ records }, 'SHORTEST PATH')
+
+      return new Promise((resolve) => resolve(null))
+    } catch (error) {
+      logger.error({ currentId, targetId }, 'Error while finding the shortest path')
+      throw error
+    } finally {
+      await session.close()
+    }
+  }
+
+  async function updatePlanet({
+    id,
+    mapServiceId,
+    movementDifficulty,
+    x,
+    y,
+    neighborPlanets,
+  }: Partial<PlanetData>): Promise<PlanetData | null> {
+    logger.info({ id, mapServiceId, neighborPlanets }, 'update')
+    const session = driver.session()
+    const gameId = getCurrentGameId()
+
+    if (!gameId) {
+      logger.error('Cannot update planet in db bevause currentGameId is undefined')
+      throw new Error('GameId not found')
+    }
+
+    let cypherQuery = `
+    MATCH (p:Planet {id: $id, gameId: $gameId})
+    `
+
+    if (!neighborPlanets) throw Error(`Neighbor planets are missing, cannot update neighbors of ${id}`)
+    for (const [direction, mapServiceId] of Object.entries(neighborPlanets)) {
+      if (!mapServiceId) continue
+      const short = direction[0].toLowerCase()
+      const opposite = getOppositeDirection(direction as Direction)
+      cypherQuery += `
+      WITH *
+      OPTIONAL MATCH (${short}: Planet {mapServiceId: '${mapServiceId}'})
+      FOREACH (ignored IN CASE WHEN ${short} IS NULL THEN [1] ELSE [] END |
+      CREATE (${short}:Planet {mapServiceId: '${mapServiceId}', id: '${Id.makeId()}'})
+      )
+      WITH *
+      MERGE (p)-[:${direction}]->(${short})
+      MERGE (${short})-[:${opposite}]->(p)`
+    }
+
+    try {
+      const { records } = await session.run(cypherQuery, { id, movementDifficulty, x, y, gameId })
+
+      const result = records[0]?.has('planet') ? records[0].get('planet') : null
+      logger.info({ result }, `Updated planet :${id}, ${mapServiceId}`)
+      return result
+    } catch (error) {
+      logger.error({ error }, 'Error while updating Planet')
+      throw error
+    } finally {
+      await session.close()
+    }
+  }
+
+  async function addRelationship({
+    firstPlanet,
+    secondPlanet,
+    direction,
+  }: {
+    firstPlanet: string
+    secondPlanet: string
+    direction: Direction
+  }) {
+    const session = driver.session()
+    const gameId = getCurrentGameId()
+
+    if (!gameId) {
+      logger.error('Cannot insert planet in db bevause currentGameId is undefined')
+      throw new Error('GameId not found')
+    }
+
+    const cypherQuery = `
+        MATCH (p1 {id: $firstPlanet, gameId: $gameId})
+        MATCH (p2 {id: $secondPlanet, gameId: $gameId})
+        MERGE (p1)-[:${direction}]->(p2)
+        MERGE (p2)-[:${getOppositeDirection(direction)}]->(p1)`
+    try {
+      await session.run(cypherQuery, { firstPlanet, secondPlanet, direction, gameId })
+    } catch (error) {
+      logger.error({ firstPlanet, secondPlanet, direction, gameId }, 'Error while adding relation')
+      throw error
     }
   }
 }
