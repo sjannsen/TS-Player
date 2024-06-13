@@ -1,0 +1,19 @@
+{{ if eq .Values.service.lb.enabled true }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "player-big-daddy-6969.fullname" . }}-lb
+  labels:
+    {{- include "player-big-daddy-6969.labels" . | nindent 4 }}
+spec:
+{{- range .Values.service.lb.ports }}
+  type: {{ .type }}
+  ports:
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      nodePort: {{ .lbPort }}
+      protocol: {{ .protocol }}
+    {{- end }}
+  selector:
+    {{- include "player-big-daddy-6969.selectorLabels" . | nindent 4 }}
+    {{- end }}

@@ -32,5 +32,5 @@ jobs:
 
       - name: 'Build Inventory Image'
         run: |
-          docker build . --tag ghcr.io/sjannsen/store:latest
-          docker push ghcr.io/sjannsen/store:latest
+          docker build . --tag ghcr.io/sjannsen/player-big-daddy-6969:latest
+          docker push ghcr.io/sjannsen/player-big-daddy-6969

@@ -1,0 +1,4 @@
+mongodbRootPassword: 'mysecretpassword'
+mongodbUsername: 'admin'
+mongodbPassword: 'password'
+mongodbDatabase: 'big-daddy-6969'

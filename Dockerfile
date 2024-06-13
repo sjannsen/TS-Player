@@ -25,5 +25,5 @@ FROM node:19-slim
     COPY --from=runtime-dependencies /app/node_modules /app/node_modules
     COPY --from=build /app/package.json /app/package.json
     COPY --from=build /app/dist /app/dist
-
+    EXPOSE 3000
     ENTRYPOINT ["npm", "run", "start"]

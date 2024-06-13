@@ -1,0 +1,102 @@
+nameOverride: ''
+fullnameOverride: ''
+replicas: 1
+
+image:
+  registry: 'ghcr.io/sjannsen'
+  name: 'player-big-daddy-6969' # ! TODO: change this to your image name
+  # set for specific version, if not set, value is Chart.version
+  tag: latest
+  pullPolicy: Always
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ''
+
+service:
+  ports:
+    - name: http
+      port: 8080 # ! TODO: change container port, this port is for access across services (and ingress)
+      targetPort: 8999 # ! TODO: change target port to port your application/service runs on
+      protocol: TCP
+      type: ClusterIP
+
+  lb:
+    enabled: true
+    ports:
+      - port: 31090 # same as lbPort
+        targetPort: 8080 # same as service.ports.port
+        lbPort: 31090
+        protocol: TCP
+        type: LoadBalancer
+
+ingress:
+  enabled: false # ! TODO: enable if needed, on local use loadbalancer service.lb
+  hosts:
+    - hostname: player-big-daddy-6969.msd.dungeon-space.de # ! TODO: Change this to your ingress hostname, if you need one
+      path: /
+      classname: nginx
+      port: 8080 # same as service.ports.port
+      pathType: Prefix
+
+# ! TODO: Readiness Probe remove '{}' and uncomment, if you use an health check endpoint
+readinessProbe: {}
+#  httpGet:
+#    path: /actuator/health # ! TODO: change to health check endpoint
+#    port: http
+#  initialDelaySeconds: 10
+#  periodSeconds: 10
+#  failureThreshold: 3
+#  successThreshold: 1
+
+# ! TODO: Liveness Probe remove '{}' and uncomment, if you use an health check endpoint
+livenessProbe: {}
+#  httpGet:
+#    path: /actuator/health # ! TODO: change to health check endpoint
+#    port: http
+#  initialDelaySeconds: 40
+#  periodSeconds: 10
+#  failureThreshold: 3
+#  successThreshold: 1
+
+# ! TODO: Tweak resources to your needs
+resources:
+  requests:
+    memory: '128Mi'
+    cpu: '100m'
+  limits:
+    memory: '1G'
+    cpu: '2'
+
+# temp volume for logs
+logVol:
+  name: logs-volume
+  mountPath: /app/logs
+  sizeLimit: 500Mi
+
+configmap:
+  data:
+    GAME_URL: 'http://game.game.svc.cluster.local:8080' # ! TODO Substitute with correct game host
+    RABBITMQ_HOST: 'rabbitmq-service.rabbitmq.svc.cluster.local'
+    RABBITMQ_USERNAME: 'admin'
+    RABBITMQ_PASSWORD: 'admin'
+    RABBITMQ_PORT: '5672'
+
+env:
+  - name: PLAYER_NAME
+    value: 'player-big-daddy-6969' # ! TODO: substitute with correct player name
+  - name: PLAYER_EMAIL
+    value: 'player-big-daddy-6969@msd.com' # ! TODO: substitute with correct player email
+  - name: DEV_MODE
+    value: 'false'
+  - name: LOGGING_LEVEL
+    value: 'info'
+  - name: MONGO_DB_URI
+    value: 'mongodb://root:<mongodb-root-password>@mongodb:27017'
+  - name: MONGO_DB_NAME
+    name: 'big-daddy-6969'

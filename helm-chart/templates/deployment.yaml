@@ -1,53 +1,54 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}-deployment
-  namespace: {{ .Chart.Name }}
+  name: {{ include "player-big-daddy-6969.fullname" . }}
   labels:
-    app: {{ .Chart.Name }}
+    {{- include "player-big-daddy-6969.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicas | int }} 
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}
+      {{- include "player-big-daddy-6969.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}
+        {{- include "player-big-daddy-6969.selectorLabels" . | nindent 8 }}
     spec:
+      serviceAccountName: {{ include "player-big-daddy-6969.serviceAccountName" . }}
       containers:
-      - name: {{ .Chart.Name }}
-        image: registry.gitlab.com/the-microservice-dungeon/{{ .Chart.Name }}:latest
-        imagePullPolicy: Always
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "500m"
-          limits:
-            memory: "1G"
-            cpu: "1000m"
-        env:
-        - name: GAME_URL
-          value: http://game-service.game:8080
-        - name: RABBITMQ_HOST
-          value: rabbitmq-service.rabbitmq
-        - name: LOGGING_LEVEL
-          value: info
-        volumeMounts:
-        - mountPath: /app/logs
-          name: logs-volume
-        # livenessProbe:
-        #   httpGet:
-        #     path: /health
-        #     port: 8000
-        #     httpHeaders:
-        #     - name: Accept
-        #       value: application-json
-        #   initialDelaySeconds: 5
-        #   # Normally it would be way less. But we should avoid killing the player because we're losing state
-        #   failureThreshold: 10
-        #   periodSeconds: 6
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.Version }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          {{- range .Values.service.ports }}
+            - name: {{ .name | lower }}
+              containerPort: {{ .port }}
+              protocol: {{ .protocol }}
+              {{- end }}
+          {{- if .Values.resources }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
+          {{- if .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+            {{- end }}
+          {{- if .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "player-big-daddy-6969.fullname" . }}
+          {{- if .Values.env }}
+          env:
+          {{- toYaml .Values.env | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: {{ .Values.logVol.mountPath }}
+              name: {{ .Values.logVol.name }}
       volumes:
-      - name: logs-volume
-        emptyDir:
-          sizeLimit: 500Mi
+        - name: {{ .Values.logVol.name }}
+          emptyDir:
+            sizeLimit: {{ .Values.logVol.sizeLimit }}
+

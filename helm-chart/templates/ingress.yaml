@@ -1,17 +1,21 @@
+{{- if eq .Values.ingress.enabled true }}
+{{- $fullname := include "player-big-daddy-6969.fullname" . -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Chart.Name }}-ingress
+  name: {{ include "player-big-daddy-6969.fullname" . }}
 spec:
-  ingressClassName: nginx
   rules:
-    - host: {{ .Chart.Name }}.dungeon-space.de
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .hostname }}
       http:
         paths:
-          - pathType: Prefix
-            path: /
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ .Chart.Name }}-service
+                name: {{ $fullname }}
                 port:
-                  number: 8000
+                  number: {{ .port }}
+    {{- end }}
+{{- end }}

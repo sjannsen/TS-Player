@@ -1,4 +1,4 @@
-import resourceDb from '../../output/data-access'
+import resourceDb from '../../adapters/output/data-access'
 import makeCreateResource from './create-resource'
 import makeGetRessource from './get-resource'
 import makeGetSellingPrice from './get-selling-price'
