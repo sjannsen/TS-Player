@@ -29,6 +29,7 @@ export type MockPlanetDb = {
   addCoordinates: jest.Mock
   updateResourceAmount: jest.Mock
   updateNeighbors: jest.Mock
+  findByMapServiceId: jest.Mock
 }
 
 const mockPlanetDb: MockPlanetDb = {
@@ -46,6 +47,7 @@ const mockPlanetDb: MockPlanetDb = {
   addCoordinates: jest.fn(),
   updateResourceAmount: jest.fn(),
   updateNeighbors: jest.fn(),
+  findByMapServiceId: jest.fn(), // TODO: Update Tests
 }
 
 const clearMockPlanetDb = () => {

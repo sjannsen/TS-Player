@@ -21,6 +21,12 @@ describe('createPlanet', () => {
       y: 0,
       movementDifficulty: 1,
       resource: mockPlanetResource,
+      neighborPlanets: {
+        NORTH: 'mapId1',
+        EAST: 'mapId2',
+        SOUTH: 'mapId3',
+        WEST: 'mapId4',
+      },
     })
 
     expect(planetDb.findById.mock.calls.length).toBe(1)
@@ -35,6 +41,12 @@ describe('createPlanet', () => {
       y: 0,
       movementDifficulty: 1,
       resource: mockPlanetResource,
+      neighborPlanets: {
+        NORTH: 'mapId1',
+        EAST: 'mapId2',
+        SOUTH: 'mapId3',
+        WEST: 'mapId4',
+      },
     })
 
     expect(planetDb.findById.mock.calls.length).toBe(1)

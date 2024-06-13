@@ -19,6 +19,8 @@ spec:
       - name: {{ .Chart.Name }}
         image: registry.gitlab.com/the-microservice-dungeon/{{ .Chart.Name }}:latest
         imagePullPolicy: Always
+        ports:
+          - containerPort: 3000
         resources:
           requests:
             memory: "256Mi"
@@ -33,6 +35,9 @@ spec:
           value: rabbitmq-service.rabbitmq
         - name: LOGGING_LEVEL
           value: info
+        - name: MONGO_DB_URI
+          secretKeyRef:
+          value: "mongodb://my-mongodb-mongodb.default.svc.cluster.local:27017/mydatabase"
         volumeMounts:
         - mountPath: /app/logs
           name: logs-volume

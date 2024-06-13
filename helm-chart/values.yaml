@@ -1,0 +1,39 @@
+name: big-daddy-6969
+replicas: 1
+
+loadBalancerNodePort: 31090
+
+image:
+  name: 'registry.gitlab.com/the-microservice-dungeon/player-teams/skeletons/player-skeleton-java-springboot'
+  tag: 'latest'
+  imagePullPolicy: 'Always'
+serviceName: 'BigDaddy6969'
+
+port: 8080
+targetPort: 8080
+
+env:
+  INTERNAL_ENDPOINT_PORT: '8080'
+  EXTERNAL_ENDPOINT_PORT: '8080'
+  GAME_HOST: 'http://game-service.game:8080'
+  RABBITMQ_USERNAME: 'admin'
+  RABBITMQ_PASSWORD: 'admin'
+  RABBITMQ_HOST: 'rabbitmq-service.rabbitmq'
+  RABBITMQ_PORT: '5672'
+  PLAYER_NAME: 'BigDaddy6969'
+  PLAYER_EMAIL: 'BigDaddy6969@big.com'
+  DEV_MODE: 'false'
+
+ingress:
+  enabled: true
+  hostname: big-daddy-6969.goedel.debuas.de
+  path: /
+  classname: traefik
+
+mongodb:
+  auth:
+    username: my-user
+    password: my-password
+    database: my-database
+    namespace: big-daddy-6969 # Verwende hier den tatsächlichen Namen des Charts
+  architecture: standalone

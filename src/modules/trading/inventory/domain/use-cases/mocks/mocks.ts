@@ -12,6 +12,7 @@ type MockInventory = {
 
 const mockId = Id.makeId()
 
+// @ts-expect-error TODO
 const mockInventory: MockInventory = {}
 
 const clearMockInventory = () => {
@@ -33,7 +34,7 @@ export type MockInventoryDb = {
 
 const mockInventoryDb: MockInventoryDb = {
   findById: jest.fn().mockImplementation(({ id }: { id: string }) => {
-    return resource == 'COAL' ? mockInventory : undefined
+    return id == mockId ? mockInventory : undefined
   }),
   update: jest.fn().mockReturnValue(mockInventory),
   findAll: jest.fn().mockReturnValue([mockInventory]),
@@ -41,7 +42,7 @@ const mockInventoryDb: MockInventoryDb = {
 }
 
 const clearMockInventoryDb = () => {
-  mockInventoryDb.find.mockClear()
+  mockInventoryDb.findById.mockClear()
   mockInventoryDb.update.mockClear()
   mockInventoryDb.findAll.mockClear()
   mockInventoryDb.insert.mockClear()

@@ -5,10 +5,10 @@ import { EventContext, EventHeader, EventPayload, EventType } from './events'
 
 const rabbitMQConfig = {
   protocol: 'amqp',
-  hostname: '127.0.0.1',
-  port: 5672,
-  username: 'admin',
-  password: 'admin',
+  hostname: process.env.RABBITMQ_HOST ?? 'localhost',
+  port: Number(process.env.RABBITMQ_PORT ?? 5672),
+  username: process.env.RABBITMQ_USER ?? 'admin',
+  password: process.env.RABBITMQ_PASSWORD ?? 'admin',
 }
 
 export default async function setUpRabbitMQ(playerId: string, playerExchange: string) {
