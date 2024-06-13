@@ -6,12 +6,12 @@ describe('mineResource', () => {
   let planetDb: MockPlanetDb
   let mineResource: ReturnType<typeof makeMineResource>
 
-  beforeEach(() => {
-    clearMockPlanetDb()
+  // beforeEach(() => {
+  //   clearMockPlanetDb()
 
-    planetDb = mockPlanetDb
-    mineResource = makeMineResource({ planetDb })
-  })
+  //   planetDb = mockPlanetDb
+  //   mineResource = makeMineResource({ planetDb })
+  // })
 
   it('calls mine resource and calls the data access layer', async () => {
     const updated = await mineResource({ mapServiceId: 'mapId', amount: 10 })

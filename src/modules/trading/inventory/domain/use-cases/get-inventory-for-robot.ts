@@ -11,7 +11,7 @@ type GetInventoryForRobotProps = {
 
 export default function makeGetInventoryForRobot({ inventoryDb }: GetInventoryForRobotDependencies) {
   return async function getInventoryForRobot({ robotId }: GetInventoryForRobotProps): Promise<InventoryData | null> {
-    const inventoryData = await inventoryDb.findByRobotId({ id: robotId })
+    const inventoryData = await inventoryDb.findById({ id: robotId })
     if (!inventoryData) return null
     return { ...inventoryData }
   }

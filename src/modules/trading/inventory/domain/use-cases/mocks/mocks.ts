@@ -12,7 +12,7 @@ type MockInventory = {
 
 const mockId = Id.makeId()
 
-const mockInventory: MockInventory = {}
+const mockInventory: MockInventory = {} as MockInventory
 
 const clearMockInventory = () => {
   mockInventory.getRessource.mockClear()
@@ -29,15 +29,17 @@ export type MockInventoryDb = {
   findAll: jest.Mock
   insert: jest.Mock
   update: jest.Mock
+  find: jest.Mock
 }
 
 const mockInventoryDb: MockInventoryDb = {
   findById: jest.fn().mockImplementation(({ id }: { id: string }) => {
-    return resource == 'COAL' ? mockInventory : undefined
+    return undefined
   }),
   update: jest.fn().mockReturnValue(mockInventory),
   findAll: jest.fn().mockReturnValue([mockInventory]),
   insert: jest.fn().mockReturnValue(mockInventory),
+  find: jest.fn(),
 }
 
 const clearMockInventoryDb = () => {

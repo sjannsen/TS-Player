@@ -8,6 +8,7 @@ import { moveRobot } from '../robot/adapters/output/commands'
 import { buyRobots } from '../robot/adapters/output/commands/buyRobots'
 import { listRobots } from '../robot/domain/use-cases'
 import { mine } from './mine'
+import planetDb from '../map/adapters/output/data-access'
 
 const setUpStrategyStateHandlers = () => {
   eventBus.subscribe('RoundStatus', async ({ event }: EventContext<'RoundStatus'>) => {
@@ -28,17 +29,9 @@ const setUpStrategyStateHandlers = () => {
 
   eventBus.subscribe('RoundStatus', async ({ event }: EventContext<'RoundStatus'>) => {
     if (event.payload.roundStatus !== 'started') return
-    if (event.payload.roundNumber === 15) {
-      closeConnectionToNeo4j()
-      return
-    }
 
     if (event.payload.roundNumber < 2) return
-    if (event.payload.roundNumber == 2) {
-      await getPlanets()
-    }
 
-    logger.info('Round 10')
     const robots = await listRobots()
     if (robots.length == 0) {
       logger.error('No robots to move')
@@ -73,11 +66,15 @@ const setUpStrategyStateHandlers = () => {
 
       const neighbor = getFirstNeighbor(planet)
       if (!neighbor) {
-        logger.error({ neighborPlanet: neighbor }, 'Error while getting neighbor planet to move to')
+        logger.error(
+          { neighborPlanet: neighbor, robotPlanet: robot.currentPlanet },
+          'Error while getting neighbor planet to move to'
+        )
         return
       }
 
       const planetToMove = neighbor.value
+
       logger.info({ robot: robot.robotServiceId, planet2Move2: planetToMove }, 'Move robot to planet')
       moveRobot({ robotId: robot.robotServiceId, planetId: planetToMove })
     })

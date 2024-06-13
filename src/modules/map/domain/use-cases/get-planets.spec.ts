@@ -5,11 +5,11 @@ describe('getPlanets', () => {
   let planetDb: MockPlanetDb
   let getPlanets: ReturnType<typeof makeGetPlanets>
 
-  beforeEach(() => {
-    clearMockPlanetDb()
-    planetDb = mockPlanetDb
-    getPlanets = makeGetPlanets({ planetDb })
-  })
+  // beforeEach(() => {
+  //   clearMockPlanetDb()
+  //   planetDb = mockPlanetDb
+  //   getPlanets = makeGetPlanets({ planetDb })
+  // })
 
   it('calls the data access layer and returns the planet', async () => {
     const planets = await getPlanets()
