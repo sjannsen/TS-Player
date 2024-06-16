@@ -1,4 +1,4 @@
-import { connectToMongoDB } from '../../../../../../db/mongoDB-connection'
+import { getMongoDBConnection } from '../../../../../../db/mongoDB-connection'
 import { BankAccount } from '../../../domain/model/bankAccount'
 import { BankAccountDb } from '../../../domain/use-cases/types'
 import makeTransactionsDatabase from './transactions-database'
@@ -20,7 +20,7 @@ const bankAccountDb: BankAccountDb = {
   },
 }
 
-const transactionsDatabase = makeTransactionsDatabase({ makeDb: connectToMongoDB })
+const transactionsDatabase = makeTransactionsDatabase({ makeDb: getMongoDBConnection })
 
 export default bankAccountDb
 export { transactionsDatabase }

@@ -21,9 +21,8 @@ if (!dbName) {
 const client = new MongoClient(url)
 let db: Db
 
-async function connectToMongoDB() {
+async function initializeMongoDBConnection() {
   if (db) return db
-
   try {
     await client.connect()
     console.log(`Connected to MongoDB at ${url} and created database ${dbName}`)
@@ -33,6 +32,11 @@ async function connectToMongoDB() {
     logger.error({ error }, `Failed to connect to MongoDB: ${dbName}:${url}`)
     throw error
   }
+}
+
+async function getMongoDBConnection() {
+  if (db) return db
+  return await initializeMongoDBConnection()
 }
 
 async function closeConnectionToMongoDB() {
@@ -47,4 +51,4 @@ async function closeConnectionToMongoDB() {
   }
 }
 
-export { connectToMongoDB, closeConnectionToMongoDB }
+export { initializeMongoDBConnection, getMongoDBConnection, closeConnectionToMongoDB }

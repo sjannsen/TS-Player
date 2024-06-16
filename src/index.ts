@@ -9,6 +9,7 @@ import { updatePlayerConfig } from './shared/config'
 import { Game, Player } from './shared/types'
 import logger from './utils/logger'
 import { connectToNeo4j } from './db/neo4j-connection'
+import { closeConnectionToMongoDB, initializeMongoDBConnection } from './db/mongoDB-connection'
 
 dotenv.config()
 
@@ -38,6 +39,7 @@ const devMode = process.env.ENVIROMENT == 'dev'
 
 async function main() {
   // connectToNeo4j()
+  await initializeMongoDBConnection()
 
   if (devMode) {
     logger.info('Starting in Dev Mode')
