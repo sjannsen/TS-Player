@@ -100,10 +100,9 @@ helm:
       - name: LOGGING_LEVEL
         value: "info"
       - name: MONGO_DB_URI
-        value: "mongodb://root:<mongodb-root-password>@mongodb:27017"
+        value: "mongodb://admin:password@10.43.36.94:27017/big-daddy-6969"
       - name: MONGO_DB_NAME
         value: "big-daddy-6969"
-
 
     mongodb:
       clusterDomain: cluster.msd
