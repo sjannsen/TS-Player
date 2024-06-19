@@ -102,7 +102,7 @@ helm:
       - name: MONGO_DB_URI
         value: "mongodb://root:<mongodb-root-password>@mongodb:27017"
       - name: MONGO_DB_NAME
-        name: "big-daddy-6969"
+        value: "big-daddy-6969"
 
 
     mongodb:
