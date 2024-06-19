@@ -51,6 +51,7 @@ jobs:
           HELM_REGISTRY_PASSWORD: ${{ secrets.GIT_LAB_CI_CONTAINER_PASSWORD }}
         run: |
           helm registry login -u $HELM_REGISTRY_USER -p $HELM_REGISTRY_PASSWORD https://gitlab.com/api/v4/projects/42239222/packages/helm/stable
+          helm plugin install --version=v0.10.4 https://github.com/chartmuseum/helm-push.git
           helm repo add --username $HELM_REGISTRY_USER --password $HELM_REGISTRY_PASSWORD player-big-daddy-6969 https://gitlab.com/api/v4/projects/42239222/packages/helm/stable
           helm cm-push player-big-daddy-6969*.tgz player-big-daddy-6969
           
