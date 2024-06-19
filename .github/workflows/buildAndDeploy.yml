@@ -43,7 +43,9 @@ jobs:
         uses: Azure/setup-helm@v3
 
       - name: Package Helm Chart
-        run: helm package ./helm-chart
+        run: | 
+          helm dependency update ./helm-chart
+          helm package ./helm-chart
 
       - name: Login to Helm Registry
         env:

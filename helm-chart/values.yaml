@@ -100,3 +100,14 @@ env:
     value: 'mongodb://root:<mongodb-root-password>@mongodb:27017'
   - name: MONGO_DB_NAME
     name: 'big-daddy-6969'
+
+mongodb:
+  clusterDomain: cluster.local
+  global:
+    storageClass: standard
+  auth:
+    rootPassword: "mysecretpassword"
+    username: "admin"
+    password: "password"
+    database: "big-daddy-6969"
+
