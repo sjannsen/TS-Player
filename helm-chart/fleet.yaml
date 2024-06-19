@@ -105,12 +105,12 @@ helm:
         name: "big-daddy-6969"
 
 
-mongodb:
-  clusterDomain: cluster.msd
-  global:
-    storageClass: harvester
-  auth:
-    rootPassword: "mysecretpassword"
-    username: "admin"
-    password: "password"
-    database: "big-daddy-6969"
+    mongodb:
+      clusterDomain: cluster.msd
+      global:
+        storageClass: harvester
+      auth:
+        rootPassword: "mysecretpassword"
+        username: "admin"
+        password: "password"
+        database: "big-daddy-6969"
