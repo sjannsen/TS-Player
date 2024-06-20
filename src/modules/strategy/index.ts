@@ -1,5 +1,6 @@
 import eventBus from '../../event-handling/event-bus'
 import { EventContext } from '../../event-handling/events'
+import getMovementStrategy from './movement-strategy'
 import getTradingStrategy from './trading-strategy'
 
 const setUpStrategyEventListeners = () => {
@@ -7,6 +8,7 @@ const setUpStrategyEventListeners = () => {
     if (event.payload.roundStatus !== 'started') return
     const roundNumber = event.payload.roundNumber
     getTradingStrategy(roundNumber)
+    getMovementStrategy()
   })
 }
 
