@@ -1,5 +1,6 @@
 import eventBus from '../../event-handling/event-bus'
 import { EventContext } from '../../event-handling/events'
+import getMiningStrategy from './mining-strategy'
 import getMovementStrategy from './movement-strategy'
 import getTradingStrategy from './trading-strategy'
 
@@ -9,6 +10,7 @@ const setUpStrategyEventListeners = () => {
     const roundNumber = event.payload.roundNumber
     getTradingStrategy(roundNumber)
     getMovementStrategy()
+    getMiningStrategy()
   })
 }
 
