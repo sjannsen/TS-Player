@@ -37,13 +37,16 @@ export default function setUpPlanetEventListeners() {
     }
   })
 
-  eventBus.subscribe('ResourceMined', ({ event }) => {
+  // NOTE: ResourceMined is received for every player, so it has to be filtered
+  eventBus.subscribe('ResourceMined', async ({ event }) => {
     const { planet, minedAmount } = event.payload
+    const existingPlanet = await planetService.getPlanet({ mapServiceId: planet })
+    if (!existingPlanet) return
+
     try {
       planetService.mineResource({ mapServiceId: planet, amount: minedAmount })
     } catch (error) {
       logger.error(error, 'Error while processing ResourceMined event')
-      process.exit(5)
     }
   })
 }
