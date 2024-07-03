@@ -6,6 +6,7 @@ let currentGameId: string | null = null
 export function setUpCurrentGameHandler() {
   eventBus.subscribe('GameStatus', ({ event }: EventContext<'GameStatus'>) => {
     if (!currentGameId) currentGameId = event.payload.gameId
+    if (event.payload.status == 'ended') currentGameId = null
   })
 }
 

@@ -7,11 +7,19 @@ type JoinNextAvailableGameProps = {
   joinGame: (game: Game, player: Player) => Promise<unknown>
 }
 
+let isJoining = false
+
 export default async function joinNextAvailableGame({
   getAvailableGames,
   getPlayer,
   joinGame,
 }: JoinNextAvailableGameProps): Promise<Game> {
+  if (isJoining) {
+    logger.error('Already in joining intervall')
+    Promise.reject(new Error('Already in joining process'))
+  }
+  isJoining = true
+
   return new Promise((resolve, reject) => {
     const joinInIntervall = setInterval(async () => {
       logger.info('Beginning joining intervall')
@@ -28,12 +36,16 @@ export default async function joinNextAvailableGame({
       const availableGames: Game[] = await getAvailableGames()
       const createdGame = availableGames.find((game) => game.gameStatus == 'created')
 
-      if (!createdGame) return
+      if (!createdGame) {
+        logger.info('No created game found')
+        return
+      }
 
       const isAlreadyParticipating = createdGame?.participatingPlayers.includes(player.name)
       if (isAlreadyParticipating) {
         logger.info('The Player aready joined a game?!🤡')
         clearInterval(joinInIntervall)
+        isJoining = false
         resolve(createdGame)
         return
       }
@@ -42,7 +54,10 @@ export default async function joinNextAvailableGame({
       logger.info('Ending joining interval')
 
       clearInterval(joinInIntervall)
+      logger.info('Cleared intervall after joining')
+      isJoining = false
       resolve(createdGame)
+      logger.info('After resolve')
     }, 5000)
   })
 }

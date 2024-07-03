@@ -6,7 +6,7 @@ export default async function getAvailableGames(): Promise<Game[]> {
   try {
     const response = await axios.get('/games')
     const games: Game[] = response.data
-    logger.info(games, 'Got available games')
+    logger.info({ games }, 'Got available games')
 
     return games
   } catch (error) {

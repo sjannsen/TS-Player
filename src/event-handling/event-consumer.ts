@@ -2,6 +2,7 @@ import ampqlib from 'amqplib'
 import logger from '../utils/logger'
 import EventBus from './event-bus'
 import { EventContext, EventHeader, EventPayload, EventType } from './events'
+import { getCurrentGameId } from '../modules/game'
 
 const rabbitMQConfig = {
   protocol: 'amqp',
@@ -79,6 +80,7 @@ export default async function setUpRabbitMQ(playerId: string, playerExchange: st
     }
 
     channel.ack(message)
+    if (eventType !== 'GameStatus' && !getCurrentGameId()) return
     EventBus.publish(eventType, context)
   })
 }
