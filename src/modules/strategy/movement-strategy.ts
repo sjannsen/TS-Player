@@ -1,45 +1,31 @@
 import logger from '../../utils/logger'
-import { NeighborPlanets } from '../map/domain/model/planet'
+import { NeighborPlanets, PlanetData } from '../map/domain/model/planet'
 import planetService from '../map/domain/use-cases'
 import { moveRobot } from '../robot/adapters/output/commands'
-import robotService from '../robot/domain/use-cases'
+import { RobotData } from '../robot/domain/models/robot'
 
-export default async function getMovementStrategy() {
-  logger.info('Get MovementStrategy')
-  const robots = await robotService.listRobots()
-
-  robots.forEach(async (robot) => {
+export default async function getMovementStrategy({robot}: { robot: RobotData}): Promise<boolean> {
     logger.info(`Get movement strategy for robot ${robot.robotServiceId}`)
-    const planetId = robot.currentPlanet
-    const planet = await planetService.getPlanet({ mapServiceId: planetId })
+    const planet = await planetService.getPlanet({ mapServiceId: robot.currentPlanet })
 
-    if (planet?.resource && planet.resource.currentAmount > 0) {
-      logger.info(
-        `Robot ${robot.robotServiceId} is on planet ${robot.currentPlanet} with resource ${planet.resource.resourceType}:${planet.resource.currentAmount}`
-      )
-      return
-    }
+    if (!planet) throw new Error(`Planet for Robot with Id: ${robot.id} is undefined`)
+    if (hasPlanetResource({ planet, robot }) ) return false
+    if (!hasNeighbors({ planet })) return false
+    if (!canLeavePlanet({ planet, robot })) return false
 
-    if (!planet?.neighborPlanets) {
-      logger.warn(`Neighbor planets of planet ${planet?.mapServiceId} are undefined`)
-      return
-    }
-
-    const firstNeighborId = getFirstNeighborId(planet?.neighborPlanets)
-
+    const firstNeighborId = getFirstNeighborId(planet.neighborPlanets!)
     if (!firstNeighborId) {
-      logger.warn('Robot is on planet without neigbors')
-      return
+      const planetHasNoNeighborsMessage = 'Robot is on planet without neigbors'
+
+      logger.warn(planetHasNoNeighborsMessage)
+      return false
     }
 
-    if (planet.movementDifficulty && robot.attributes.energy < planet.movementDifficulty) {
-      logger.warn(`Cannot move robot ${robot.robotServiceId} because energy is to low`)
-      return
-    }
+    const moveRobotMessage = `Move robot ${robot.robotServiceId} to planet ${firstNeighborId}`
 
-    logger.info(`Move robot ${robot.robotServiceId} to planet ${firstNeighborId}`)
+    logger.info(moveRobotMessage)
     moveRobot({ robotId: robot.robotServiceId, planetId: firstNeighborId })
-  })
+    return true
 }
 
 function getFirstNeighborId(neighborPlanets: NeighborPlanets) {
@@ -47,4 +33,43 @@ function getFirstNeighborId(neighborPlanets: NeighborPlanets) {
     if (firstNeighborId) return firstNeighborId
   }
   return undefined
+}
+
+function canLeavePlanet({planet, robot}:{ planet: PlanetData, robot: RobotData}): boolean {
+  const planetMovementDifficulty = planet.movementDifficulty
+  if (!planetMovementDifficulty) return false
+
+  const robotEnergy = robot.attributes.energy
+  const robotHasEnoughEnergyToLeavePlanet = robotEnergy < planetMovementDifficulty
+
+  if (!robotHasEnoughEnergyToLeavePlanet) {
+    const notEnoughEnergyMessage = `Cannot move robot ${robot.robotServiceId} because energy is to low`
+    logger.warn(notEnoughEnergyMessage)
+  }
+
+  return robotHasEnoughEnergyToLeavePlanet
+}
+
+function hasPlanetResource({ planet, robot }: {planet: PlanetData, robot: RobotData}): boolean {
+  const planetResource = planet?.resource
+  if (!planetResource) return false
+
+  if (planetResource.currentAmount == 0) {
+    const exhaustedResourcesMessage = `Robot ${robot.robotServiceId} is on planet ${robot.currentPlanet} with exausted resource ${planetResource.resourceType}:${planetResource.currentAmount}`
+    logger.info(exhaustedResourcesMessage)
+    return false
+  }
+
+  return true
+}
+
+function hasNeighbors({ planet }: { planet: PlanetData }): boolean {
+  const planetNeighbors = planet?.neighborPlanets;
+  if (!planetNeighbors) {
+    const neighborsUndefinedMessage = `Neighbor planets of planet ${planet?.mapServiceId} are undefined`;
+    logger.warn(neighborsUndefinedMessage);
+    return false;
+  }
+
+  return Object.values(planetNeighbors).some(planetId => planetId !== undefined && planetId !== null);
 }
