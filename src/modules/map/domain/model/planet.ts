@@ -63,12 +63,13 @@ export default function buildMakePlanet({ Id }: MakePlanetDependencies) {
     const Y_NEGATIVE_ERROR = `The y-coordinate: ${y} is negative`
     const MOVEMENT_DIFFICULTY_NEGATIVE_ERROR = `The movementDifficulty: ${movementDifficulty} is negative`
     const MOVEMENT_DIFFICULTY_EXCEEDING_LIMIT_ERROR = `The movementDifficulty: ${movementDifficulty} exceeds the limit`
+    const MOVEMENT_DIFFICULTY_UNDEFINED_ERROR = `'Movementdifficulty is undefined'`
 
     if (!Id.isValidId(id)) throw new PlanetInvalidArgumentError(ID_INVALID_ERROR)
     if (!mapServiceId) throw new PlanetInvalidArgumentError(MAP_SERVICE_ID_INVALID_ERROR)
     if (x && x < 0) throw new PlanetInvalidArgumentError(X_NEGATIVE_ERROR)
     if (y && y < 0) throw new PlanetInvalidArgumentError(Y_NEGATIVE_ERROR)
-    if (!movementDifficulty) throw new Error('Movementdifficulty is undefined')
+    if (!movementDifficulty) throw new PlanetInvalidArgumentError(MOVEMENT_DIFFICULTY_UNDEFINED_ERROR)
     if (movementDifficulty <= 0) throw new PlanetInvalidArgumentError(MOVEMENT_DIFFICULTY_NEGATIVE_ERROR)
     if (movementDifficulty > 3) throw new PlanetInvalidArgumentError(MOVEMENT_DIFFICULTY_EXCEEDING_LIMIT_ERROR)
 
