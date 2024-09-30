@@ -3,6 +3,7 @@ import { NeighborPlanets, PlanetData } from '../map/domain/model/planet'
 import planetService from '../map/domain/use-cases'
 import { moveRobot } from '../robot/adapters/output/commands'
 import { RobotData } from '../robot/domain/models/robot'
+import { regenerateRobot } from '../robot/domain/use-cases'
 
 export default async function getMovementStrategy({ robot }: { robot: RobotData }): Promise<boolean> {
     logger.info(`Get movement strategy for robot ${robot.robotServiceId}`)
@@ -11,7 +12,14 @@ export default async function getMovementStrategy({ robot }: { robot: RobotData 
     if (!planet) throw new Error(`Planet for Robot with Id: ${robot.id} is undefined`)
     if (hasPlanetResource({ planet, robot })) return false
     if (!hasNeighbors({ planet })) return false
-    if (!canLeavePlanet({ planet, robot })) return false
+    if (!canLeavePlanet({ planet, robot })) {
+        regenerateRobot({
+            id: robot.id,
+            robotServiceId: robot.robotServiceId,
+            availableEnergy: robot.attributes.energy,
+        })
+        return true
+    }
 
     const firstNeighborId = getFirstNeighborId(planet.neighborPlanets!)
     if (!firstNeighborId) {
