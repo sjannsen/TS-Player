@@ -10,32 +10,48 @@ export default async function getMovementStrategy({robot}: { robot: RobotData}):
     logger.info(`Get movement strategy for robot ${robot.robotServiceId}`)
     const planetId = robot.currentPlanet
     const planet = await planetService.getPlanet({ mapServiceId: planetId })
+    const planetResource = planet?.resource
 
-    if (planet?.resource && planet.resource.currentAmount > 0) {
-      logger.info(
-        `Robot ${robot.robotServiceId} is on planet ${robot.currentPlanet} with resource ${planet.resource.resourceType}:${planet.resource.currentAmount}`
-      )
+    const planetHasNoResource = !planetResource
+    if (planetHasNoResource) return false
+
+    const planetsResourcesExhausted = planetResource.currentAmount > 0
+    if (planetsResourcesExhausted) {
+      const planetsResourcesExhaustedMessage = `Robot ${robot.robotServiceId} is on planet ${robot.currentPlanet} with resource ${planetResource.resourceType}:${planetResource.currentAmount}`
+
+      logger.info(planetsResourcesExhaustedMessage)
       return false
     }
 
-    if (!planet?.neighborPlanets) {
-      logger.warn(`Neighbor planets of planet ${planet?.mapServiceId} are undefined`)
+    const planetNeighbors = planet?.neighborPlanets
+    const planetNeighborsUndefined =!planetNeighbors
+    if (planetNeighborsUndefined) {
+      const planetNeighborsUndefinedMessage = `Neighbor planets of planet ${planet?.mapServiceId} are undefined`
+      logger.warn(planetNeighborsUndefinedMessage)
       return false
     }
 
-    const firstNeighborId = getFirstNeighborId(planet?.neighborPlanets)
+    const firstNeighborId = getFirstNeighborId(planetNeighbors)
 
     if (!firstNeighborId) {
-      logger.warn('Robot is on planet without neigbors')
+      const planetWithNoNeighborsMessage = 'Robot is on planet without neigbors'
+      logger.warn(planetWithNoNeighborsMessage)
       return false
     }
 
-    if (planet.movementDifficulty && robot.attributes.energy < planet.movementDifficulty) {
-      logger.warn(`Cannot move robot ${robot.robotServiceId} because energy is to low`)
+    const planetMovementDifficulty = planet.movementDifficulty
+    if (!planetMovementDifficulty) return false
+
+    const robotEnergy = robot.attributes.energy
+    const robotHasEnoughEnergyToLeavePlanet = robotEnergy < planetMovementDifficulty
+    if (!robotHasEnoughEnergyToLeavePlanet) {
+      const robotNotEnoughEnergyMessage = `Cannot move robot ${robot.robotServiceId} because energy is to low`
+      logger.warn(robotNotEnoughEnergyMessage)
       return false
     }
 
-    logger.info(`Move robot ${robot.robotServiceId} to planet ${firstNeighborId}`)
+    const moveRobotMessage = `Move robot ${robot.robotServiceId} to planet ${firstNeighborId}`
+    logger.info(moveRobotMessage)
     moveRobot({ robotId: robot.robotServiceId, planetId: firstNeighborId })
     return true
 }
