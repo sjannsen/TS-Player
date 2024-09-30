@@ -8,15 +8,15 @@ export default async function getMiningStrategy({ robot }: { robot: RobotData })
     const planetResource = planet?.resource
 
     if (!planet) throw new Error(`Planet of robot with ID ${robot.id} is not found`)
-    if (!planetResource) return false;
+    if (!planetResource) return false
     if (planetResource.currentAmount == 0) return false
 
     // TODO: Compare with mining level of robot
     if (planetResource.resourceType != 'COAL') {
-      const miningLevelTooLowMessage = `Robot has to low mining level ${robot.levels.miningLevel} to mine resource ${planetResource.resourceType}`
+        const miningLevelTooLowMessage = `Robot has to low mining level ${robot.levels.miningLevel} to mine resource ${planetResource.resourceType}`
 
-      logger.warn(miningLevelTooLowMessage)
-      return false
+        logger.warn(miningLevelTooLowMessage)
+        return false
     }
 
     mineResources({ robotId: robot.robotServiceId })
