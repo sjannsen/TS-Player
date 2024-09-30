@@ -5,17 +5,21 @@ import { RobotData } from '../robot/domain/models/robot'
 
 export default async function getMiningStrategy({ robot }: { robot: RobotData }): Promise<boolean> {
     const planet = await planetService.getPlanet({ mapServiceId: robot.currentPlanet })
-    if (!planet?.resource || planet.resource.currentAmount == 0) return false
+    const planetResource = planet?.resource
 
-    logger.info(
-      `Mining resource ${planet.resource.resourceType}:${planet.resource.currentAmount} with robot ${robot.robotServiceId} on planet ${robot.currentPlanet}`
-    )
+    if (!planet) throw new Error(`Planet of robot with ID ${robot.id} is not found`)
+
+    const planetHasNoResource = !planetResource
+    if (planetHasNoResource) return false;
+
+    const planetsResourcesExhausted = planetResource.currentAmount == 0
+    if (planetsResourcesExhausted) return false
 
     // TODO: Compare with mining level of robot
-    if (planet.resource.resourceType != 'COAL') {
-      logger.warn(
-        `Robot has to low mining level ${robot.levels.miningLevel} to mine resource ${planet.resource.resourceType}`
-      )
+    if (planetResource.resourceType != 'COAL') {
+      const miningLevelTooLowMessage = `Robot has to low mining level ${robot.levels.miningLevel} to mine resource ${planetResource.resourceType}`
+
+      logger.warn(miningLevelTooLowMessage)
       return false
     }
 
