@@ -1,7 +1,9 @@
 import logger from '../../utils/logger'
+import { getCurrentRoundNumber } from '../game/roundStatus'
 import { buyRobots } from '../robot/adapters/output/commands'
 
-export default async function getTradingStrategy(roundNumber: number) {
+export default async function getTradingStrategy() {
+  const roundNumber = getCurrentRoundNumber()
   if (roundNumber === 2) getFirstRoundStrategy()
 }
 
