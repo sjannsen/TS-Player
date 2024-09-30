@@ -47,7 +47,13 @@ const mockPlanetDb: MockPlanetDb = {
   addCoordinates: jest.fn(),
   updateResourceAmount: jest.fn(),
   updateNeighbors: jest.fn(),
-  findByMapServiceId: jest.fn(), // TODO: Update Tests
+  findByMapServiceId: jest
+    .fn()
+    .mockImplementation((queryParams: { id?: string; mapServiceId?: string; resource?: ResourceType }) => {
+      if (queryParams.resource === 'COAL' || queryParams.mapServiceId === 'mapId' || queryParams.id === mockPlanetId)
+        return Promise.resolve(mockPlanet)
+      return Promise.resolve(undefined)
+    }),
 }
 
 const clearMockPlanetDb = () => {
@@ -55,6 +61,7 @@ const clearMockPlanetDb = () => {
   mockPlanetDb.update.mockClear()
   mockPlanetDb.findAll.mockClear()
   mockPlanetDb.insert.mockClear()
+  mockPlanetDb.findByMapServiceId.mockClear()
 }
 
 export { clearMockPlanetDb, mockPlanet, mockPlanetDb, mockPlanetResource }

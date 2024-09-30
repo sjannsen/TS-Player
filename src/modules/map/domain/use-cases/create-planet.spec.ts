@@ -29,7 +29,7 @@ describe('createPlanet', () => {
       },
     })
 
-    expect(planetDb.findById.mock.calls.length).toBe(1)
+    expect(planetDb.findByMapServiceId.mock.calls.length).toBe(1)
     expect(planetDb.insert.mock.calls.length).toBe(1)
   })
 
@@ -49,7 +49,7 @@ describe('createPlanet', () => {
       },
     })
 
-    expect(planetDb.findById.mock.calls.length).toBe(1)
+    expect(planetDb.findByMapServiceId.mock.calls.length).toBe(1)
     expect(planetDb.insert.mock.calls.length).toBe(0)
     expect(planet).toEqual(mockPlanet)
   })

@@ -1,6 +1,5 @@
-import { Direction } from '../../../../shared/types'
 import logger from '../../../../utils/logger'
-import makePlanet, { Id } from '../model'
+import makePlanet from '../model'
 import { NeighborPlanets, PlanetResource } from '../model/planet'
 import { PlanetDb } from './data-access'
 
