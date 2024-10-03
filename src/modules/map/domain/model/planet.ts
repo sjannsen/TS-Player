@@ -22,7 +22,7 @@ export type Planet = {
   getId: () => string
   getMapServiceId: () => string
   getCoordinates: () => { x: number | undefined; y: number | undefined }
-  getMovementDifficulty: () => number
+  getMovementDifficulty: () => number | undefined
   getResource: () => PlanetResource | undefined | null
   getNeighborPlanets: () => NeighborPlanets
   mineResource: (amount: number) => void
@@ -69,9 +69,9 @@ export default function buildMakePlanet({ Id }: MakePlanetDependencies) {
     if (!mapServiceId) throw new PlanetInvalidArgumentError(MAP_SERVICE_ID_INVALID_ERROR)
     if (x && x < 0) throw new PlanetInvalidArgumentError(X_NEGATIVE_ERROR)
     if (y && y < 0) throw new PlanetInvalidArgumentError(Y_NEGATIVE_ERROR)
-    if (!movementDifficulty) throw new PlanetInvalidArgumentError(MOVEMENT_DIFFICULTY_UNDEFINED_ERROR)
-    if (movementDifficulty <= 0) throw new PlanetInvalidArgumentError(MOVEMENT_DIFFICULTY_NEGATIVE_ERROR)
-    if (movementDifficulty > 3) throw new PlanetInvalidArgumentError(MOVEMENT_DIFFICULTY_EXCEEDING_LIMIT_ERROR)
+    if (movementDifficulty == 0) throw new PlanetInvalidArgumentError(MOVEMENT_DIFFICULTY_UNDEFINED_ERROR)
+    if (movementDifficulty && movementDifficulty <= 0) throw new PlanetInvalidArgumentError(MOVEMENT_DIFFICULTY_NEGATIVE_ERROR)
+    if (movementDifficulty && movementDifficulty > 3) throw new PlanetInvalidArgumentError(MOVEMENT_DIFFICULTY_EXCEEDING_LIMIT_ERROR)
 
     const resourceState = resource
 
