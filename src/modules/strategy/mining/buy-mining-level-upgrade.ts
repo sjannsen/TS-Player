@@ -12,14 +12,14 @@ const miningLevels: { [key: number]: string } = {
   5: 'MINING_5',
 }
 
-type BuyMiningLevelUpgrade = {
+type BuyMiningLevelUpgradeProps = {
   robot: RobotData
   buyUpgrade: ({ robotId, planetId, itemName, itemQuantity }: BuyUpgradeCommandData) => Promise<void>
   bankAccountService: { getBalance: () => number }
   itemService: { findByName: ({ name }: { name: string }) => Promise<ItemData | null> }
 }
 
-export default async function makeBuyMiningLevelUpgrade({ robot, buyUpgrade, bankAccountService, itemService }: BuyMiningLevelUpgrade) {
+export default async function makeBuyMiningLevelUpgrade({ robot, buyUpgrade, bankAccountService, itemService }: BuyMiningLevelUpgradeProps) {
   const currentMiningLevel = robot.levels.miningLevel
   const nextMiningUpgrade = miningLevels[currentMiningLevel + 1]
   const currentBalance = bankAccountService.getBalance()
