@@ -15,16 +15,7 @@ describe('buyMiningLevelUpgrade', () => {
     } as RobotLevels,
   }
 
-  const buyMiningLevelUpgrade = ({ robot }: { robot: RobotData }) =>
-    makeBuyMiningLevelUpgrade({
-      robot,
-      buyUpgrade: mockBuyUpgrade,
-      bankAccountService: mockBankAccountService,
-      itemService: mockItemService,
-    })
-
   beforeEach(() => jest.clearAllMocks())
-
   it('should return false and not call buyUpgrade if balance is too low', async () => {
     mockItemService = {
       findByName: jest.fn().mockResolvedValueOnce({
@@ -34,6 +25,11 @@ describe('buyMiningLevelUpgrade', () => {
       }),
     }
     mockBankAccountService = { getBalance: jest.fn().mockImplementationOnce(() => 100) }
+    const buyMiningLevelUpgrade = makeBuyMiningLevelUpgrade({
+      buyUpgrade: mockBuyUpgrade,
+      bankAccountService: mockBankAccountService,
+      itemService: mockItemService,
+    })
 
     await buyMiningLevelUpgrade({ robot: mockRobot as RobotData })
 
@@ -52,6 +48,11 @@ describe('buyMiningLevelUpgrade', () => {
       }),
     }
     mockBankAccountService = { getBalance: jest.fn().mockImplementationOnce(() => 200) }
+    const buyMiningLevelUpgrade = makeBuyMiningLevelUpgrade({
+      buyUpgrade: mockBuyUpgrade,
+      bankAccountService: mockBankAccountService,
+      itemService: mockItemService,
+    })
 
     await buyMiningLevelUpgrade({ robot: mockRobot as RobotData })
 
