@@ -15,7 +15,7 @@ const miningLevels: { [key: number]: string } = {
 type BuyMiningLevelUpgradeDependencies = {
   buyUpgrade: ({ robotId, planetId, itemName, itemQuantity }: BuyUpgradeCommandData) => Promise<void>
   bankAccountService: { getBalance: () => number }
-  itemService: { findByName: ({ name }: { name: string }) => Promise<ItemData | null> }
+  itemService: { findByName: ({ itemName }: { itemName: string }) => Promise<ItemData | null> }
 }
 
 export default function makeBuyMiningLevelUpgrade({
@@ -29,7 +29,10 @@ export default function makeBuyMiningLevelUpgrade({
     const currentBalance = bankAccountService.getBalance()
     const PRICE_UNDEFINED_MESSAGE = `Can not upgrade mining level of 🤖: ${robot.robotServiceId}. No price could be found for the upgrade: ${nextMiningUpgrade}`
 
-    const { price: upgradePrice } = (await itemService.findByName({ name: nextMiningUpgrade })) ?? {}
+    const item = await itemService.findByName({ itemName: nextMiningUpgrade })
+    if (!item) return false
+
+    const upgradePrice = item.price
     if (!upgradePrice) throw new Error(PRICE_UNDEFINED_MESSAGE)
 
     if (currentBalance < upgradePrice) {
