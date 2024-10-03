@@ -7,18 +7,18 @@ type FindByNameDependencies = {
 }
 
 type FindByNameProps = {
-  name: string
+  itemName: string
 }
 
 export default function makeFindByName({ itemDatabase }: FindByNameDependencies) {
-  return async function findByName({ name }: FindByNameProps) {
+  return async function findByName({ itemName }: FindByNameProps) {
     const currentRoundNumber = getCurrentRoundNumber()
 
     if (!currentRoundNumber) {
-      logger.error({ name, currentRoundNumber }, 'Cannot find item by name, currentRoundNumber is undefined')
+      logger.error({ itemName, currentRoundNumber }, 'Cannot find item by name, currentRoundNumber is undefined')
       throw new Error('CurrentRoundNumber is undefined')
     }
 
-    return await itemDatabase.findByName({ name, roundNumber: currentRoundNumber })
+    return await itemDatabase.findByName({ itemName, roundNumber: currentRoundNumber })
   }
 }
