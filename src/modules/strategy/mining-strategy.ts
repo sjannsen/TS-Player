@@ -5,34 +5,39 @@ import { RobotData } from '../robot/domain/models/robot'
 import { buyMiningLevelUpgrade } from './mining'
 
 function mapResourceToMiningLevel(resource: ResourceType): number {
-    switch (resource) {
-        case 'COAL': return 1
-        case 'IRON': return 2
-        case 'GEM': return 3
-        case 'GOLD': return 4
-        case 'PLATIN': return 5
-    }
+  switch (resource) {
+    case 'COAL':
+      return 1
+    case 'IRON':
+      return 2
+    case 'GEM':
+      return 3
+    case 'GOLD':
+      return 4
+    case 'PLATIN':
+      return 5
+  }
 }
 
 export default async function getMiningStrategy({ robot }: { robot: RobotData }): Promise<boolean> {
-    const planet = await planetService.getPlanet({ mapServiceId: robot.currentPlanet })
-    const planetResource = planet?.resource
-    const planetResourceType = planet?.resource?.resourceType
+  const planet = await planetService.getPlanet({ mapServiceId: robot.currentPlanet })
+  const planetResource = planet?.resource
+  const planetResourceType = planet?.resource?.resourceType
 
-    if (!planet) throw new Error(`Planet of robot with ID ${robot.id} is not found`)
-    if (!planetResource || planetResource.currentAmount == 0) return false
+  if (!planet) throw new Error(`Planet of robot with ID ${robot.id} is not found`)
+  if (!planetResource || planetResource.currentAmount == 0) return false
 
-    if (planetResourceType) {
-        const resourceLevel = mapResourceToMiningLevel(planetResourceType)
-        const currentMiningLevel = robot.levels.miningLevel
-        const isMiningLevelTooLow = currentMiningLevel < resourceLevel
+  if (planetResourceType) {
+    const resourceLevel = mapResourceToMiningLevel(planetResourceType)
+    const currentMiningLevel = robot.levels.miningLevel
+    const isMiningLevelTooLow = currentMiningLevel < resourceLevel
 
-        if (isMiningLevelTooLow) {
-            buyMiningLevelUpgrade({ robot })
-            return false
-        }
+    if (isMiningLevelTooLow) {
+      buyMiningLevelUpgrade({ robot })
+      return false
     }
+  }
 
-    mineResources({ robotId: robot.robotServiceId })
-    return true
+  mineResources({ robotId: robot.robotServiceId })
+  return true
 }
