@@ -10,7 +10,7 @@ type MakeItemsDatabaseProps = {
 type ItemSchema = ItemData & { gameId: string; roundNumber: number }
 
 export default function makeItemsDatabase({ makeDb }: MakeItemsDatabaseProps) {
-  return Object.freeze({ findItem, findAllByRoundNumber, findAllByType, insert })
+  return Object.freeze({ findItem, findAllByRoundNumber, findAllByType, insert, findByName })
 
   async function findItem(name: string, roundNumber: number): Promise<ItemData | null> {
     const db = await makeDb()
@@ -51,6 +51,22 @@ export default function makeItemsDatabase({ makeDb }: MakeItemsDatabaseProps) {
       name,
       price,
     }))
+  }
+
+  async function findByName({ name, roundNumber }: { name: string, roundNumber: number}) {
+    const db = await makeDb()
+    const gameId = getCurrentGameId()
+    if (!gameId) {
+      logger.error({ gameId }, 'Could not findAllByType, because gameId is undefied')
+      throw new Error('GameId is undefined')
+    }
+
+    const result = await db.collection<ItemSchema>('items').findOne({ name, roundNumber, gameId })
+
+    if (!result) return result
+
+    const { type, price } = result
+    return { name, price, type}
   }
 
   async function insert({ itemData, roundNumber }: { itemData: ItemData; roundNumber: number }): Promise<ItemData> {
