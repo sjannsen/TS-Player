@@ -20,7 +20,7 @@ export default function setUpTradingEventListeners() {
     else bankAccountService.depositMoney({ amount: transactionAmount })
 
     const balance = bankAccountService.getBalance()
-    logger.info({ balance: event.payload.balance, actualBalance: balance }, 'New balance should be')
+    logger.info({ eventBalance: event.payload.balance, actualBalance: balance, transactionAmount }, 'A Transaction has been booked 🤑💸')
   })
 
   eventBus.subscribe('BankAccountCleared', async ({ event }) => {

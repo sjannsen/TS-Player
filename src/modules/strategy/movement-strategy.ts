@@ -6,8 +6,8 @@ import { RobotData } from '../robot/domain/models/robot'
 import { regenerateRobot } from '../robot/domain/use-cases'
 
 export default async function getMovementStrategy({ robot }: { robot: RobotData }): Promise<boolean> {
-    logger.info(`Get movement strategy for robot ${robot.robotServiceId}`)
     const planet = await planetService.getPlanet({ mapServiceId: robot.currentPlanet })
+    logger.info({robot, to: planet}, `Move robot`)
 
     if (!planet) throw new Error(`Planet for Robot with Id: ${robot.id} is undefined`)
     if (hasPlanetResource({ planet, robot })) return false
@@ -45,7 +45,11 @@ function getFirstNeighborId(neighborPlanets: NeighborPlanets) {
 
 function canLeavePlanet({ planet, robot }: { planet: PlanetData; robot: RobotData }): boolean {
     const planetMovementDifficulty = planet.movementDifficulty
-    if (!planetMovementDifficulty) return false
+    if (!planetMovementDifficulty) {
+        logger.error({ robot, planet }, 'Cannot move robot, movement difficulty is undefined')
+        throw new Error('YOYOYO')
+        return false // TODO: FIX
+        }
 
     const robotEnergy = robot.attributes.energy
     const robotHasEnoughEnergyToLeavePlanet = robotEnergy < planetMovementDifficulty
