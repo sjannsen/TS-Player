@@ -1,4 +1,5 @@
 import { ResourceType } from '../../shared/types'
+import logger from '../../utils/logger'
 import planetService from '../map/domain/use-cases'
 import { mineResources } from '../robot/adapters/output/commands'
 import { RobotData } from '../robot/domain/models/robot'
@@ -7,15 +8,15 @@ import { buyMiningLevelUpgrade } from './mining'
 function mapResourceToMiningLevel(resource: ResourceType): number {
   switch (resource) {
     case 'COAL':
-      return 1
+      return 0
     case 'IRON':
-      return 2
+      return 1
     case 'GEM':
-      return 3
+      return 2
     case 'GOLD':
-      return 4
+      return 3
     case 'PLATIN':
-      return 5
+      return 4
   }
 }
 
@@ -28,6 +29,7 @@ export default async function getMiningStrategy({ robot }: { robot: RobotData })
   if (!planetResource || planetResource.currentAmount == 0) return false
 
   if (planetResourceType) {
+    logger.info({ planetResource, robot: robot.robotServiceId, level: robot.levels.miningLevel }, 'Robot is on resource 🤖⛏️')
     const resourceLevel = mapResourceToMiningLevel(planetResourceType)
     const currentMiningLevel = robot.levels.miningLevel
     const isMiningLevelTooLow = currentMiningLevel < resourceLevel
