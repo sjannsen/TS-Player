@@ -12,39 +12,44 @@ const miningLevels: { [key: number]: string } = {
   5: 'MINING_5',
 }
 
-type BuyMiningLevelUpgrade = {
-  robot: RobotData
+type BuyMiningLevelUpgradeDependencies = {
   buyUpgrade: ({ robotId, planetId, itemName, itemQuantity }: BuyUpgradeCommandData) => Promise<void>
   bankAccountService: { getBalance: () => number }
   itemService: { findByName: ({ name }: { name: string }) => Promise<ItemData | null> }
 }
 
-export default async function makeBuyMiningLevelUpgrade({ robot, buyUpgrade, bankAccountService, itemService }: BuyMiningLevelUpgrade) {
-  const currentMiningLevel = robot.levels.miningLevel
-  const nextMiningUpgrade = miningLevels[currentMiningLevel + 1]
-  const currentBalance = bankAccountService.getBalance()
-  const PRICE_UNDEFINED_MESSAGE = `Can not upgrade mining level of 🤖: ${robot.robotServiceId}. No price could be found for the upgrade: ${nextMiningUpgrade}`
+export default function makeBuyMiningLevelUpgrade({
+  buyUpgrade,
+  bankAccountService,
+  itemService,
+}: BuyMiningLevelUpgradeDependencies) {
+  return async function buyMiningLevelUpgrade({ robot }: { robot: RobotData }) {
+    const currentMiningLevel = robot.levels.miningLevel
+    const nextMiningUpgrade = miningLevels[currentMiningLevel + 1]
+    const currentBalance = bankAccountService.getBalance()
+    const PRICE_UNDEFINED_MESSAGE = `Can not upgrade mining level of 🤖: ${robot.robotServiceId}. No price could be found for the upgrade: ${nextMiningUpgrade}`
 
-  const { price: upgradePrice } = (await itemService.findByName({ name: nextMiningUpgrade })) ?? {}
-  if (!upgradePrice) throw new Error(PRICE_UNDEFINED_MESSAGE)
+    const { price: upgradePrice } = (await itemService.findByName({ name: nextMiningUpgrade })) ?? {}
+    if (!upgradePrice) throw new Error(PRICE_UNDEFINED_MESSAGE)
 
-  if (currentBalance < upgradePrice) {
-    const BALANCE_TOO_LOW_MESSAGE = `Can not buy upgrade: ${nextMiningUpgrade} for robot: ${robot.robotServiceId} 💰🙄, the current balance is too low: ${currentBalance} < ${upgradePrice}`
+    if (currentBalance < upgradePrice) {
+      const BALANCE_TOO_LOW_MESSAGE = `Can not buy upgrade: ${nextMiningUpgrade} for robot: ${robot.robotServiceId}, the current balance is too low: ${currentBalance} < ${upgradePrice} 💰🙄`
 
-    logger.warn(BALANCE_TOO_LOW_MESSAGE)
-    return false
-  }
+      logger.warn(BALANCE_TOO_LOW_MESSAGE)
+      return false
+    }
 
-  try {
-    await buyUpgrade({
-      robotId: robot.robotServiceId,
-      planetId: robot.currentPlanet,
-      itemName: nextMiningUpgrade,
-      itemQuantity: 1,
-    })
-  } catch (error) {
-    if (isAxiosError(error)) error as AxiosError
-    logger.error({ error }, 'Error while buying upgrade')
-    throw error
+    try {
+      await buyUpgrade({
+        robotId: robot.robotServiceId,
+        planetId: robot.currentPlanet,
+        itemName: nextMiningUpgrade,
+        itemQuantity: 1,
+      })
+    } catch (error) {
+      if (isAxiosError(error)) error as AxiosError
+      logger.error({ error }, 'Error while buying upgrade')
+      throw error
+    }
   }
 }

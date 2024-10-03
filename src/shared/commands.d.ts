@@ -23,6 +23,7 @@ export type RegenerateCommandData = {
 
 export type SellTradablesCommandData = {
   robotId: string
+  planetId: string
 }
 
 export type CommandType = 'mining' | 'movement' | 'battle' | 'buying' | 'selling' | 'regenerate'
