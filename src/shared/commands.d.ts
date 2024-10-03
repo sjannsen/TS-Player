@@ -1,3 +1,7 @@
+export type BuyUpgradeCommandData = BuyTradableCommandData & {
+  planetId: string
+}
+
 export type BuyTradableCommandData = {
   robotId: string | null
   itemName: string
@@ -45,6 +49,8 @@ export type BattleCommandData = {
 export type BattleCommand = Command<'battle', BattleCommandData>
 
 export type BuyTradableCommand = Command<'buying', BuyTradableCommandData>
+
+export type BuyUpgradeCommand = Command<'buying', BuyUpgradeCommandData>
 
 export type MineCommand = Command<'mining', MineCommandData>
 

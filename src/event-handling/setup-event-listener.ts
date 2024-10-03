@@ -3,6 +3,7 @@ import setUpRobotEventListeners from '../modules/robot/adapters/input/event-hand
 import { setUpStrategyEventListeners } from '../modules/strategy'
 import setUpTradingEventListeners from '../modules/trading/bank-account/adapters/input/event-handling/bankAccount-event-listener'
 import setUpItemEventListeners from '../modules/trading/item/adapters/input/item-event-listener'
+import setUpUpgradeEventListener from '../modules/trading/upgrade/adapters/input/event-handling/upgrade-event-listener'
 
 export default function setUpEventListeners() {
   setUpTradingEventListeners()
@@ -10,4 +11,5 @@ export default function setUpEventListeners() {
   setUpRobotEventListeners()
   setUpItemEventListeners()
   setUpStrategyEventListeners()
+  setUpUpgradeEventListener()
 }

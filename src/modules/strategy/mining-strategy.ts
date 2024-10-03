@@ -1,24 +1,43 @@
-import logger from '../../utils/logger'
+import { ResourceType } from '../../shared/types'
 import planetService from '../map/domain/use-cases'
 import { mineResources } from '../robot/adapters/output/commands'
 import { RobotData } from '../robot/domain/models/robot'
+import { buyMiningLevelUpgrade } from './mining'
+
+function mapResourceToMiningLevel(resource: ResourceType): number {
+  switch (resource) {
+    case 'COAL':
+      return 1
+    case 'IRON':
+      return 2
+    case 'GEM':
+      return 3
+    case 'GOLD':
+      return 4
+    case 'PLATIN':
+      return 5
+  }
+}
 
 export default async function getMiningStrategy({ robot }: { robot: RobotData }): Promise<boolean> {
-    const planet = await planetService.getPlanet({ mapServiceId: robot.currentPlanet })
-    const planetResource = planet?.resource
+  const planet = await planetService.getPlanet({ mapServiceId: robot.currentPlanet })
+  const planetResource = planet?.resource
+  const planetResourceType = planet?.resource?.resourceType
 
-    if (!planet) throw new Error(`Planet of robot with ID ${robot.id} is not found`)
-    if (!planetResource) return false
-    if (planetResource.currentAmount == 0) return false
+  if (!planet) throw new Error(`Planet of robot with ID ${robot.id} is not found`)
+  if (!planetResource || planetResource.currentAmount == 0) return false
 
-    // TODO: Compare with mining level of robot
-    if (planetResource.resourceType != 'COAL') {
-        const miningLevelTooLowMessage = `Robot has to low mining level ${robot.levels.miningLevel} to mine resource ${planetResource.resourceType}`
+  if (planetResourceType) {
+    const resourceLevel = mapResourceToMiningLevel(planetResourceType)
+    const currentMiningLevel = robot.levels.miningLevel
+    const isMiningLevelTooLow = currentMiningLevel < resourceLevel
 
-        logger.warn(miningLevelTooLowMessage)
-        return false
+    if (isMiningLevelTooLow) {
+      buyMiningLevelUpgrade({ robot })
+      return false
     }
+  }
 
-    mineResources({ robotId: robot.robotServiceId })
-    return true
+  mineResources({ robotId: robot.robotServiceId })
+  return true
 }
