@@ -34,7 +34,7 @@ describe('buyMiningLevelUpgrade', () => {
     await buyMiningLevelUpgrade({ robot: mockRobot as RobotData })
 
     expect(mockItemService.findByName).toHaveBeenCalledTimes(1)
-    expect(mockItemService.findByName).toHaveBeenCalledWith({ name: 'MINING_1' })
+    expect(mockItemService.findByName).toHaveBeenCalledWith({ itemName: 'MINING_1' })
     expect(mockBankAccountService.getBalance).toHaveBeenCalledTimes(1)
     expect(mockBuyUpgrade).toHaveBeenCalledTimes(0)
   })
@@ -57,7 +57,7 @@ describe('buyMiningLevelUpgrade', () => {
     await buyMiningLevelUpgrade({ robot: mockRobot as RobotData })
 
     expect(mockItemService.findByName).toHaveBeenCalledTimes(1)
-    expect(mockItemService.findByName).toHaveBeenCalledWith({ name: 'MINING_1' })
+    expect(mockItemService.findByName).toHaveBeenCalledWith({ itemName: 'MINING_1' })
     expect(mockBankAccountService.getBalance).toHaveBeenCalledTimes(1)
     expect(mockBuyUpgrade).toHaveBeenCalledTimes(1)
   })
