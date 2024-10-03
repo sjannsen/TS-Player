@@ -1,15 +1,14 @@
 import axios from 'axios'
 import dotenv from 'dotenv'
-import { clearSetUp, setUpGame, startGame } from './development-setup'
+import { initializeMongoDBConnection } from './db/mongoDB-connection'
+import { clearSetUp, setUpGame } from './development-setup'
 import setUpRabbitMQ from './event-handling/event-consumer'
 import setUpEventListeners from './event-handling/setup-event-listener'
-import { joinNextGameAvailable, setUpPlayer } from './setup'
+import { setUpPlayer } from './setup'
 import { setUpStateHandlers } from './setup/setUpStateHandlers'
 import { updatePlayerConfig } from './shared/config'
-import { Game, Player } from './shared/types'
+import { Player } from './shared/types'
 import logger from './utils/logger'
-import { connectToNeo4j } from './db/neo4j-connection'
-import { closeConnectionToMongoDB, initializeMongoDBConnection } from './db/mongoDB-connection'
 
 dotenv.config()
 
@@ -63,10 +62,5 @@ async function main() {
 
   setUpStateHandlers()
   setUpEventListeners()
-
-  const game: Game = await joinNextGameAvailable()
-  if (devMode) await startGame(game.gameId)
 }
 main()
-
-// clearSetUp()
