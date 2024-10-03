@@ -2,8 +2,7 @@ import { AxiosError, isAxiosError } from 'axios'
 import { BuyUpgradeCommandData } from '../../../shared/commands'
 import logger from '../../../utils/logger'
 import { RobotData } from '../../robot/domain/models/robot'
-import bankAccountService from '../../trading/bank-account/domain/use-cases'
-import itemService from '../../trading/item/domain/use-cases'
+import { ItemData } from '../../trading/item/domain/model/item'
 
 const miningLevels: { [key: number]: string } = {
   1: 'MINING_1',
@@ -16,9 +15,11 @@ const miningLevels: { [key: number]: string } = {
 type BuyMiningLevelUpgrade = {
   robot: RobotData
   buyUpgrade: ({ robotId, planetId, itemName, itemQuantity }: BuyUpgradeCommandData) => Promise<void>
+  bankAccountService: { getBalance: () => number }
+  itemService: { findByName: ({ name }: { name: string }) => Promise<ItemData | null> }
 }
 
-export default async function makeBuyMiningLevelUpgrade({ robot, buyUpgrade }: BuyMiningLevelUpgrade) {
+export default async function makeBuyMiningLevelUpgrade({ robot, buyUpgrade, bankAccountService, itemService }: BuyMiningLevelUpgrade) {
   const currentMiningLevel = robot.levels.miningLevel
   const nextMiningUpgrade = miningLevels[currentMiningLevel + 1]
   const currentBalance = bankAccountService.getBalance()
