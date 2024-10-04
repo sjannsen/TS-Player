@@ -26,12 +26,10 @@ export default function makeCreatePlanet({ planetDb }: CreatePlanetDependencies)
     resource,
     neighborPlanets,
   }: CreatePlanetProps) {
-    logger.info({ mapServiceId }, 'Create planet')
-
     const exist = await planetDb.findByMapServiceId({ mapServiceId })
     if (exist) return exist
 
-    logger.info({ mapServiceId }, 'Planet does not exist')
+    logger.info({ mapServiceId }, '🌎 Planet does not already exist. Adding it to the map 🗺️')
     const planet = makePlanet({ mapServiceId, x, y, movementDifficulty, resource, neighborPlanets })
     const created = await planetDb.insert({
       id: planet.getId(),

@@ -7,13 +7,12 @@ import { transactionsDatabase } from '../../output/data-access'
 export default function setUpTradingEventListeners() {
   eventBus.subscribe('BankAccountInitialized', ({ event, playerContext }) => {
     if (event.payload.playerId !== playerContext.playerId) return
-    logger.info({ event: event.payload }, 'Initialize bank account')
+    logger.info({ event: event.payload }, 'Initialize bank account 🤑🤑🤑')
     bankAccountService.createBankAccount({ initialBalance: event.payload.balance })
   })
 
   eventBus.subscribe('BankAccountTransactionBooked', ({ event, playerContext }) => {
     if (event.payload.playerId !== playerContext.playerId) return
-    logger.info('Transaction has been booked')
 
     const transactionAmount = event.payload.transactionAmount
     if (transactionAmount < 0) bankAccountService.withdrawMoney({ amount: Math.abs(transactionAmount) })

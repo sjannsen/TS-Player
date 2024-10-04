@@ -10,7 +10,7 @@ export default async function getTradingStrategy() {
 async function getFirstRoundStrategy() {
   try {
     await buyRobots(5)
-    logger.info('Bought robots')
+    logger.info('Bought initial robots 🤖🔪')
   } catch (error) {
     logger.error({ error }, 'An error ocurred while buying robots')
   }

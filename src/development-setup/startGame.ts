@@ -6,7 +6,7 @@ export default async function startGame(gameId: string) {
     logger.info(gameId, 'Starting a game')
     const response = await axios.post(`/games/${gameId}/gameCommands/start`)
     const { data } = response
-    logger.info({ data, gameId }, 'Game started')
+    logger.info({ data, gameId }, 'Game started... 🔥')
   } catch (error) {
     logger.error(error, 'Error while starting the game')
     throw error

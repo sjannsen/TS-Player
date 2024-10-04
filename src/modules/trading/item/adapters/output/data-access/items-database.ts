@@ -65,7 +65,6 @@ export default function makeItemsDatabase({ makeDb }: MakeItemsDatabaseProps) {
     if (!result) return result
 
     const { type, price } = result
-    logger.warn({ type, price}, 'QUERY ')
     return { name: itemName, price, type}
   }
 

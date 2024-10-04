@@ -29,7 +29,7 @@ export default async function getMiningStrategy({ robot }: { robot: RobotData })
   if (!planetResource || planetResource.currentAmount == 0) return false
 
   if (planetResourceType) {
-    logger.info({ planetResource, robot: robot.robotServiceId, level: robot.levels.miningLevel }, 'Robot is on resource 🤖⛏️')
+    logger.info({ planetResource, robot: robot.robotServiceId, level: robot.levels.miningLevel }, 'Robot is on resource ⛰️⛏️')
     const resourceLevel = mapResourceToMiningLevel(planetResourceType)
     const currentMiningLevel = robot.levels.miningLevel
     const isMiningLevelTooLow = currentMiningLevel < resourceLevel

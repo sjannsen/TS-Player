@@ -26,6 +26,6 @@ export function setUpRoundStatusStateHandler() {
     updateCurrentRound(roundNumber, roundId)
 
     const currentRoundNumber = getCurrentRoundNumber()
-    logger.info({ currentRoundNumber }, 'Current Round')
+    logger.info({ currentRoundNumber }, 'Current Round 🕛')
   })
 }
