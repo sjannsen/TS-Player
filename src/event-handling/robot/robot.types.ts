@@ -34,7 +34,7 @@ export type RobotInventoryPayload = {
 }
 
 export type FullRobot = {
-  planet: Exclude<'id', Planet> & { planetId: string }
+  planet: Omit<Planet, 'id'> & { planetId: string }
   inventory: RobotInventoryPayload
 } & RobotPayload
 
