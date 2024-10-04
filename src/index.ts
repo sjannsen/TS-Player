@@ -54,7 +54,7 @@ async function main() {
     throw new Error('Player undefined')
   }
 
-  logger.info({ playerName, playerEmail }, 'SetUp Player')
+  logger.info({ playerName, playerEmail }, 'SetUp Player 🫅')
   const player: Player = await setUpPlayer(playerName, playerEmail)
 
   logger.info({ playerId: player.playerId, playerExchange: player.playerExchange }, 'SetUp RabbitMQ')
