@@ -1,12 +1,23 @@
-import logger from "../../../utils/logger"
-import { buyRobots } from "../../robot/adapters/output/commands"
-import robotService from "../../robot/domain/use-cases"
-import bankAccountService from "../../trading/bank-account/domain/use-cases"
-import itemService from "../../trading/item/domain/use-cases"
+import logger from '../../../../utils/logger'
+import { RobotData } from '../../../robot/domain/models/robot'
+import { ItemData } from '../../../trading/item/domain/model/item'
+
+type GetRobotBuyingStrategyDependencies = {
+  bankAccountService: { getBalance: () => number }
+  itemService: { findByName: ({ itemName }: { itemName: string }) => Promise<ItemData | null> }
+  robotService: { listRobots: () => Promise<RobotData[]> }
+  buyRobots: (amount: number) => Promise<void>
+}
 
 const ROBOT_LIMIT = 100
 
-export default async function getRobotBuyingStrategy() {
+export default function makeGetRobotBuyingStrategy({
+  bankAccountService,
+  itemService,
+  robotService,
+  buyRobots
+}: GetRobotBuyingStrategyDependencies) {
+  return async function getRobotBuyingStrategy() {
     const currentBalance = bankAccountService.getBalance()
     const robotItem = await itemService.findByName({ itemName: 'ROBOT' })
     const miningUpgrade = await itemService.findByName({ itemName: 'MINING_3' })
@@ -34,3 +45,4 @@ export default async function getRobotBuyingStrategy() {
       await buyRobots(buyableAmount)
     }
   }
+}
