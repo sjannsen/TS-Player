@@ -1,32 +1,33 @@
 # README TS-Player
 
 ## Table of Contents
-1. [Before Start](#🚗-before-start)
-2. [Starting the project](#🏎️-starting-the-project)
-3. [Running Tests](#😬-running-tests)
+1. [🚗 Before Start](#🚗-before-start)
+2. [🏎️ Starting the project](#🏎️-starting-the-project)
+3. [😬 Running Tests](#😬-running-tests)
+   - [📓 Note](#📓-note)
 4. [The Architecture](#the-architecture)
-   - [General directories](#📁-general-directories)
-     - [.github](#📂-github)
-     - [hem-chart](#📂-hem-chart)
-     - [logs](#📂-logs)
-     - [development-setup](#📂-development-setup)
-     - [event-handling](#📂-event-handling)
-     - [setup](#📂-setup)
-     - [modules](#📂-modules)
-   - [General Information](#📰-general-information)
-   - [The modules directory](#📁-the-modules-directory)
-     - [game](#📂-game)
-     - [map](#📂-map)
-     - [robot](#📂-robot)
-     - [strategy](#📂-strategy)
-     - [shared](#📂-shared)
-     - [trading](#📂-trading)
-       - [bank-account](#📂-bank-account)
-       - [inventory](#📂-inventory)
-       - [item](#📂-item)
-       - [resource](#📂-resource)
-5. [Design choices](#🖌️-design-choices)
-6. [Planned Features](#📆-planned-features)
+   - [📁 General directories](#📁-general-directories)
+     - [📂 .github](#📂-github)
+     - [📂 hem-chart](#📂-hem-chart)
+     - [📂 logs](#📂-logs)
+     - [📂 development-setup](#📂-development-setup)
+     - [📂 event-handling](#📂-event-handling)
+     - [📂 setup](#📂-setup)
+     - [📂 modules](#📂-modules)
+   - [📂 General Information](#📰-general-information)
+   - [📂 The modules directory](#📁-the-modules-directory)
+     - [📂 game](#📂-game)
+     - [📂 map](#📂-map)
+     - [📂 robot](#📂-robot)
+     - [📂 strategy](#📂-strategy)
+     - [📂 shared](#📂-shared)
+     - [📂 trading](#📂-trading)
+       - [📂 bank-account](#📂-bank-account)
+       - [📂 inventory](#📂-inventory)
+       - [📂 item](#📂-item)
+       - [📂 resource](#📂-resource)
+5. [🖌️ Design choices](#🖌️-design-choices)
+6. [📆 Planned Features](#📆-planned-features)
 
 ## 🚗 Before Start
 Run these commands in the directory:
@@ -43,9 +44,26 @@ The dev-mode can be activated via entry in the .env file
 `npm run dev`
 
 ## 😬 Running Tests
-
+Run this command in order to execute all unit tests:
 `npm test`
 
+Run this command to execute the integration test:
+`npm run test:integration`
+
+### 📓 Note:
+The integration test is currently very unstable and often fails. The issue could not be resolved within the given timeframe. To run the integration test, the databases need to be up and running.
+Brief overview of the integration test:
+
+It creates the following situation:
+
+![Situation of the Integrationtest](./images/Integrationtest.png)
+
+Then, several rounds are simulated, and the expected outcome is as follows:
+Robot-I goes to Planet-1 and starts mining.
+Robot-II starts mining immediately as it is capable of doing so.
+Robot-III gets the MINING_1 upgrade and then starts mining.
+
+Currently, the test is not fully implemented, as the mining part is completely missing.
 
 ## The Architecture
 
