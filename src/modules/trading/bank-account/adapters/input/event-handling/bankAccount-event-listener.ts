@@ -1,4 +1,3 @@
-import { closeConnectionToNeo4j } from '../../../../../../db/neo4j-connection'
 import eventBus from '../../../../../../event-handling/event-bus'
 import logger from '../../../../../../utils/logger'
 import bankAccountService from '../../../domain/use-cases'
@@ -23,10 +22,9 @@ export default function setUpTradingEventListeners() {
   })
 
   eventBus.subscribe('BankAccountCleared', async ({ event }) => {
-    logger.info({ endBalance: event.payload.balance }, 'BankAccount has been cleared')
+    logger.info({ endBalance: event.payload.balance }, 'BankAccount has been cleared 😐💰')
 
     const transacions = await transactionsDatabase.findAll()
-    logger.info({ transacions }, 'Transactions')
-    closeConnectionToNeo4j() // TODO: This is not optimal and will be redone
+    logger.info({ transacions }, 'Transaction history 💸')
   })
 }

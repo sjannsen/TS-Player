@@ -9,6 +9,7 @@ import { setUpStateHandlers } from './setup/setUpStateHandlers'
 import { updatePlayerConfig } from './shared/config'
 import { Player } from './shared/types'
 import logger from './utils/logger'
+import { connectToNeo4j } from './db/neo4j-connection'
 
 dotenv.config()
 
@@ -37,7 +38,7 @@ process.on('exit', (code) => {
 const devMode = process.env.ENVIROMENT == 'dev'
 
 async function main() {
-  // connectToNeo4j()
+  connectToNeo4j() // NOTE: Currently not working
   await initializeMongoDBConnection()
 
   if (devMode) {
