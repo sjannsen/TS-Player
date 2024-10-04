@@ -61,7 +61,7 @@ export default function makeItemsDatabase({ makeDb }: MakeItemsDatabaseProps) {
       throw new Error('GameId is undefined')
     }
 
-    const result = await db.collection<ItemSchema>('items').findOne({ name: itemName, roundNumber, gameId })
+    const result = await db.collection<ItemSchema>('items').findOne({ name: itemName, roundNumber: roundNumber - 1, gameId })
     if (!result) return result
 
     const { type, price } = result
