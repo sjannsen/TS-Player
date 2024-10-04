@@ -73,7 +73,7 @@ Functions for creating a game in dev mode
 Everything for setting up the RabbitMQ Listening
 
 ### 📂 setup
-Functions to register for an to join a game
+Functions to register for & to join a game
 
 ### 📂 modules
 All modules containing the business logic
