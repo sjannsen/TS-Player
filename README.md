@@ -51,7 +51,7 @@ Run this command to execute the integration test:
 `npm run test:integration`
 
 ### 📓 Note:
-The integration test is currently very unstable and often fails. The issue could not be resolved within the given timeframe. To run the integration test, the databases need to be up and running.
+Currently the integration test is very unstable and fails often. The issue could not be resolved within the given timeframe. To run the integration test, the databases need to be up and running.
 Brief overview of the integration test:
 
 It creates the following situation:
@@ -59,9 +59,9 @@ It creates the following situation:
 ![Situation of the Integrationtest](./images/Integrationtest.png)
 
 Then, several rounds are simulated, and the expected outcome is as follows:
-Robot-I goes to Planet-1 and starts mining.
-Robot-II starts mining immediately as it is capable of doing so.
-Robot-III gets the MINING_1 upgrade and then starts mining.
+Robot-1 goes to Planet-1 and starts mining.
+Robot-2 starts mining immediately as it is capable of doing so.
+Robot-3 gets the MINING_1 upgrade and then starts mining.
 
 Currently, the test is not fully implemented, as the mining part is completely missing.
 
