@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --testPathIgnorePatterns='src/modules/strategy/mining/test/mining-integration-test.spec.ts'",
+    "test:integration": "jest --testPathPattern='src/modules/strategy/mining/test/mining-integration-test.spec.ts'",
     "start": "node --es-module-specifier-resolution=node dist/index.js",
     "compile": "tsc --removeComments true",
     "dev": "concurrently --kill-others -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm:dev:ts\" \"npm:dev:node\"",
