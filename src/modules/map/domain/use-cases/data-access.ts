@@ -4,7 +4,7 @@ export type PlanetDb = {
   insert: (planetData: Omit<PlanetData, 'x' | 'y'>) => Promise<Partial<PlanetData> | null>
   findById: ({ id }: { id: string }) => Promise<PlanetData | null>
   findAll: () => Promise<PlanetData[]>
-  // findShortestPath: ({ currentId, targetId }: { currentId: string; targetId: string }) => Promise<unknown | null>
+  // findShortestPath: ({ currentId, targetId }: { currentId: string; targetId: string }) => Promise<unknown | null> // TODO: Implement via Neo4j
   findByMapServiceId: ({ mapServiceId }: { mapServiceId: string }) => Promise<PlanetData | null>
   update: ({
     id,
