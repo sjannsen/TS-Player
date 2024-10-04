@@ -48,7 +48,7 @@ function canLeavePlanet({ planet, robot }: { planet: PlanetData; robot: RobotDat
         }
 
     const robotEnergy = robot.attributes.energy
-    const robotHasEnoughEnergyToLeavePlanet = robotEnergy < planetMovementDifficulty
+    const robotHasEnoughEnergyToLeavePlanet = robotEnergy > planetMovementDifficulty
 
     if (!robotHasEnoughEnergyToLeavePlanet) {
         const notEnoughEnergyMessage = `Cannot move robot 🤖 ${robot.robotServiceId} because energy is to low ⚡`
