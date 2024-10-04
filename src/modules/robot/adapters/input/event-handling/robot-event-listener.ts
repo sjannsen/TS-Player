@@ -10,11 +10,11 @@ import { RobotFightResult } from '../../../domain/use-cases/data-access'
 
 export default function setUpRobotEventListeners() {
   eventBus.subscribe('RobotSpawned', async ({ event }: EventContext<'RobotSpawned'>) => {
-    logger.info({ payload: event.payload }, 'ROBOTS SPAWNED')
 
     try {
       const { robotData, inventoryData } = mapFullRobotToRobot({ robot: event.payload.robot })
       const inventory = await inventoryService.createInventory({ inventoryData })
+      logger.info({ robot: robotData.robotServiceId, planet: robotData.currentPlanet }, 'New Robots 🤖 spawned')
       robotService.createRobot({ robotData: { ...robotData, inventoryId: inventory.id } })
     } catch (error) {
       handeError(event, error)
@@ -22,8 +22,8 @@ export default function setUpRobotEventListeners() {
   })
 
   eventBus.subscribe('RobotAttacked', async ({ event }: EventContext<'RobotAttacked'>) => {
-    logger.info({ payload: event.payload }, 'RobotAttacked')
     const { attacker, target } = event.payload
+    logger.info({ attacker, target }, 'Robot has been attacked ⚔️')
 
     const mappedAttacker: RobotFightResult = {
       robotServiceId: attacker.robotId,
@@ -47,8 +47,8 @@ export default function setUpRobotEventListeners() {
   })
 
   eventBus.subscribe('RobotMoved', async ({ event }: EventContext<'RobotMoved'>) => {
-    logger.info({ payload: event.payload }, 'RobotMoved')
     const { robotId, remainingEnergy, fromPlanet, toPlanet } = event.payload
+    logger.info({ robotId, fromPlanet, toPlanet, remainingEnergy }, 'Robot has been moved 🚶‍♂️')
 
     const robot = await getRobot({ queryParams: { robotServiceId: robotId } })
     if (!robot) {
@@ -74,8 +74,8 @@ export default function setUpRobotEventListeners() {
   })
 
   eventBus.subscribe('RobotRegenerated', async ({ event }: EventContext<'RobotRegenerated'>) => {
-    logger.info({ payload: event.payload }, 'RobotRegenerated')
     const { robotId, availableEnergy } = event.payload
+    logger.info({ robotId, availableEnergy }, 'Robot has regenerated 🤕')
     try {
       await robotService.regenerateRobot({ robotServiceId: robotId, availableEnergy })
     } catch (error) {
@@ -84,8 +84,8 @@ export default function setUpRobotEventListeners() {
   })
 
   eventBus.subscribe('RobotResourceMined', ({ event }: EventContext<'RobotResourceMined'>) => {
-    logger.info({ payload: event.payload }, 'RobotResourceMined')
     const { robotId, minedResource, minedAmount, resourceInventory } = event.payload
+    logger.info({ robot: robotId, minedResource, minedAmount, resourceInventory }, 'Robot 🤖 has mined resource ⛏️')
 
     try {
       robotService.mineResource({ robotServiceId: robotId, minedResource, minedAmount })
@@ -95,8 +95,8 @@ export default function setUpRobotEventListeners() {
   })
 
   eventBus.subscribe('RobotResourceRemoved', ({ event }: EventContext<'RobotResourceRemoved'>) => {
-    logger.info({ payload: event.payload }, 'RobotResourceRemoved')
     const { robotId, removedResource, removedAmount, resourceInventory } = event.payload
+    logger.info({ robotId, removedResource, removedAmount, resourceInventory }, 'Resource has been removed from robot 👜')
 
     try {
       robotService.removeResource({ robotServiceId: robotId, resource: removedResource, amount: removedAmount })
@@ -106,8 +106,8 @@ export default function setUpRobotEventListeners() {
   })
 
   eventBus.subscribe('RobotRestoredAttributes', ({ event }: EventContext<'RobotRestoredAttributes'>) => {
-    logger.info({ payload: event.payload }, 'RobotRestoredAttributes')
     const { robotId, restorationType, availableEnergy, availableHealth } = event.payload
+    logger.info({ robotId, restorationType, availableEnergy, availableHealth }, 'Robot attributs have been restored ⚡❤️‍🩹')
 
     try {
       robotService.restoreAttributes({ robotServiceId: robotId, restorationType, availableEnergy, availableHealth })
@@ -117,8 +117,8 @@ export default function setUpRobotEventListeners() {
   })
 
   eventBus.subscribe('RobotUpgraded', ({ event }: EventContext<'RobotUpgraded'>) => {
-    logger.info({ payload: event.payload }, 'RobotUpgraded')
     const { robotId, robot, level, upgrade } = event.payload
+    logger.info({ robotId, level, upgrade, robot }, 'Robot has got an update 🤖⏫')
     try {
       robotService.upgradeRobot({ robotServiceId: robotId, level, upgrade })
     } catch (error) {
@@ -126,9 +126,6 @@ export default function setUpRobotEventListeners() {
     }
   })
 
-  eventBus.subscribe('RobotsRevealed', ({ event }: EventContext<'RobotsRevealed'>) => {
-    // TODO: check if is own robot
-  })
 }
 
 function mapFullRobotToRobot({ robot }: { robot: FullRobot }) {

@@ -3,7 +3,7 @@ import logger from '../utils/logger'
 
 const maxRounds = 10_000
 const maxPlayers = 10
-const RoundDuration = 4_000
+const RoundDuration = 8_000
 
 type InitializeGameProps = {
   createGame: (maxRounds: number, maxPlayers: number) => Promise<Game>

@@ -7,7 +7,6 @@ import { regenerateRobot } from '../robot/domain/use-cases'
 
 export default async function getMovementStrategy({ robot }: { robot: RobotData }): Promise<boolean> {
     const planet = await planetService.getPlanet({ mapServiceId: robot.currentPlanet })
-    logger.info({robot, to: planet}, `Move robot`)
 
     if (!planet) throw new Error(`Planet for Robot with Id: ${robot.id} is undefined`)
     if (hasPlanetResource({ planet, robot })) return false
@@ -29,9 +28,8 @@ export default async function getMovementStrategy({ robot }: { robot: RobotData 
         return false
     }
 
-    const moveRobotMessage = `Move robot ${robot.robotServiceId} to planet ${firstNeighborId}`
-
-    logger.info(moveRobotMessage)
+    const moveRobotMessage = `Move robot 🤖 to planet 🌎`
+    logger.info({ robot: robot.robotServiceId, planet: firstNeighborId }, moveRobotMessage)
     moveRobot({ robotId: robot.robotServiceId, planetId: firstNeighborId })
     return true
 }
@@ -46,16 +44,14 @@ function getFirstNeighborId(neighborPlanets: NeighborPlanets) {
 function canLeavePlanet({ planet, robot }: { planet: PlanetData; robot: RobotData }): boolean {
     const planetMovementDifficulty = planet.movementDifficulty
     if (!planetMovementDifficulty) {
-        logger.error({ robot, planet }, 'Cannot move robot, movement difficulty is undefined')
-        throw new Error('YOYOYO')
-        return false // TODO: FIX
+        return false
         }
 
     const robotEnergy = robot.attributes.energy
     const robotHasEnoughEnergyToLeavePlanet = robotEnergy < planetMovementDifficulty
 
     if (!robotHasEnoughEnergyToLeavePlanet) {
-        const notEnoughEnergyMessage = `Cannot move robot ${robot.robotServiceId} because energy is to low`
+        const notEnoughEnergyMessage = `Cannot move robot 🤖 ${robot.robotServiceId} because energy is to low ⚡`
         logger.warn(notEnoughEnergyMessage)
     }
 

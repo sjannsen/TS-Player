@@ -16,7 +16,7 @@ export default async function getPlayer(name: string, email: string): Promise<Pl
       },
     })
     const player = response.data
-    logger.info(player, 'Got player')
+    logger.info(player, 'Got player 👑')
     return player
   } catch (error) {
     if (!axios.isAxiosError(error) || error.response?.status != 404)

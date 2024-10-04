@@ -20,7 +20,6 @@ export default function setUpPlanetEventListeners() {
 
     try {
       const existing = await planetService.getPlanet({ mapServiceId: planet })
-      logger.info({ existing }, 'Existing planet')
       if (!existing)
         await planetService.createPlanet({ mapServiceId: planet, movementDifficulty, resource, neighborPlanets })
       else

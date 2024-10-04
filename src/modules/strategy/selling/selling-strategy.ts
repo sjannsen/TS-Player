@@ -13,7 +13,6 @@ type GetSellingStrategyDependencies = {
 
 export default function makeGetSellingStrategy({ inventoryService, sellResources }: GetSellingStrategyDependencies) {
   return async function getSellingStrategy({ robot }: { robot: RobotData }): Promise<boolean> {
-    logger.info('Get selling strategy')
     const inventoryId = robot.inventoryId
     if (!inventoryId) throw new Error(`InventoryId of robot: ${JSON.stringify(robot)} is undefined`)
 

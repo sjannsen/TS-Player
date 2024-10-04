@@ -15,9 +15,9 @@ async function connectToNeo4j() {
   try {
     await session.run('RETURN 1')
     const serverInfo = await driver.getServerInfo()
-    logger.info({ serverInfo }, 'Sucessfully connected to Neo4j: ')
+    logger.info({ serverInfo }, 'Sucessfully connected to Neo4j ✅')
   } catch (error) {
-    logger.error({ error }, 'Error while connecting to Neo4j: ')
+    logger.error({ error }, 'Error while connecting to Neo4j')
     throw error
   } finally {
     await session.close()
