@@ -1,9 +1,9 @@
-import logger from '../../utils/logger'
-import { NeighborPlanets, PlanetData } from '../map/domain/model/planet'
-import planetService from '../map/domain/use-cases'
-import { moveRobot } from '../robot/adapters/output/commands'
-import { RobotData } from '../robot/domain/models/robot'
-import { regenerateRobot } from '../robot/domain/use-cases'
+import logger from '../../../utils/logger'
+import { NeighborPlanets, PlanetData } from '../../map/domain/model/planet'
+import planetService from '../../map/domain/use-cases'
+import { moveRobot } from '../../robot/adapters/output/commands'
+import { RobotData } from '../../robot/domain/models/robot'
+import { regenerateRobot } from '../../robot/domain/use-cases'
 
 export default async function getMovementStrategy({ robot }: { robot: RobotData }): Promise<boolean> {
     const planet = await planetService.getPlanet({ mapServiceId: robot.currentPlanet })

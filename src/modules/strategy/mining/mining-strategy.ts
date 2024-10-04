@@ -1,9 +1,9 @@
-import { ResourceType } from '../../shared/types'
-import logger from '../../utils/logger'
-import planetService from '../map/domain/use-cases'
-import { mineResources } from '../robot/adapters/output/commands'
-import { RobotData } from '../robot/domain/models/robot'
-import { buyMiningLevelUpgrade } from './mining'
+import { ResourceType } from '../../../shared/types'
+import logger from '../../../utils/logger'
+import planetService from '../../map/domain/use-cases'
+import { mineResources } from '../../robot/adapters/output/commands'
+import { RobotData } from '../../robot/domain/models/robot'
+import { buyMiningLevelUpgrade } from '.'
 
 function mapResourceToMiningLevel(resource: ResourceType): number {
   switch (resource) {
